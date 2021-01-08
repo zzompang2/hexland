@@ -1,8 +1,13 @@
+import { HashRouter, Route } from "react-router-dom";
+import Home from "./routes/Home";
+import Game from "./routes/Game";
+
 function App() {
   return (
-    <div className="App">
-      Hello Ham
-    </div>
+    <HashRouter>
+      <Route exact path="/" component={Home} />
+      <Route exact path="/game" component={Game} />
+    </HashRouter>
   );
 }
 

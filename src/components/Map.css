@@ -1,0 +1,8 @@
+/* .tiles_column {
+	display: flex;
+	flex-direction: column;
+} */
+
+.tiles_row {
+	display: flex;
+}
