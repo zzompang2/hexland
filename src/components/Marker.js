@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import "./Marker.css";
 
 const ownerColors = ["#e0e0e0", "red", "blue"];
@@ -6,16 +6,25 @@ const WIDTH = 20;
 const HEIGHT = 20;
 
 class Marker extends React.Component {
+	state = {
+		canvasRef: createRef()
+	}
 	componentDidMount() {
-		const { id } = this.props;
+		let { canvasRef } = this.state;
+		const { owner } = this.props;
+		let canvas = canvasRef.current;
 
-		var canvas = document.getElementById(`marker${id}`);
-		if (canvas.getContext) {
-			var ctx = canvas.getContext('2d');
+		if (canvas !== null) {
+			let ctx = canvas.getContext('2d');
+			let circle = new Path2D();
 
-			var circle = new Path2D();
 			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2, 0, 2 * Math.PI);
-			ctx.fillStyle = ownerColors[id];
+			ctx.fillStyle = "black";
+			ctx.fill(circle);
+
+			circle = new Path2D();
+			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-2, 0, 2 * Math.PI);
+			ctx.fillStyle = ownerColors[owner];
 			ctx.fill(circle);
 		}
 
@@ -31,8 +40,9 @@ class Marker extends React.Component {
 	}
 
 	render() {
-		console.log("Marker: render");
-		const { id, position } = this.props;
+		console.log("Marker: render", this.props.owner);
+		const { canvasRef } = this.state;
+		const { position } = this.props;
 
 		const styles = {
 			top: position.y * HEIGHT,
@@ -41,7 +51,10 @@ class Marker extends React.Component {
 
 		return (
 			<div className="markerContainer" style={styles}>
-				<canvas id={`marker${id}`} width={WIDTH} height={HEIGHT}></canvas>
+				<canvas
+				ref={canvasRef}
+				width={WIDTH}
+				height={HEIGHT} />
 			</div>
 		)
 	}

@@ -11,6 +11,7 @@ class Game extends React.Component {
 		mapSize: mapSize,
 		position: startPosition,
 		diceValues: [],
+		tilesOwner: [],
 		tilesMark: [],
 		candidatePos: []
 	}
@@ -95,8 +96,8 @@ class Game extends React.Component {
 	}
 
 	handleClick = (e, x, y) => {
-		const { tilesMark, candidatePos } = this.state;
-		console.log("click:", x, y);
+		const { position, tilesOwner, tilesMark, candidatePos } = this.state;
+		console.log("타일 클릭:", x, y);
 
 		if(candidatePos.length === 0)
 			return;
@@ -113,37 +114,51 @@ class Game extends React.Component {
 		if(newPosition === undefined)
 			return;
 		
-		console.log("새로운 좌표:", newPosition);
-		candidatePos.map(pos => {
-			tilesMark[pos.y][pos.x] = false;
-		})
-		this.setState({ position: newPosition, diceValues: [], tilesMark, candidatePos: [] });
+		console.log("이동한 좌표:", newPosition);
+		candidatePos.map(pos => { tilesMark[pos.y][pos.x] = false; })
+
+		if(position.x !== newPosition.x) {
+			const min = Math.min(position.x, newPosition.x);
+			const max = Math.max(position.x, newPosition.x);
+			for(let i=min; i<=max; i++)
+				tilesOwner[position.y][i] = 1;
+		}
+		else {
+			const min = Math.min(position.y, newPosition.y);
+			const max = Math.max(position.y, newPosition.y);
+			for(let i=min; i<=max; i++)
+				tilesOwner[i][position.x] = 1;
+		}
+		this.setState({ position: newPosition, diceValues: [], tilesOwner, tilesMark, candidatePos: [] });
 	}
 
 	componentDidMount() {
-		const { x, y } = this.state.mapSize;
-		const tilesMark = [];
+		const { tilesOwner, tilesMark, mapSize: {x, y} } = this.state;
 
 		for (let j=0; j<y; j++) {
-			const row = [];
+			const ownerRow = [];
+			const markRow = [];
 
-			for (let i=0; i<x; i++)
-				row.push(false);
-			tilesMark.push(row);
+			for (let i=0; i<x; i++) {
+				ownerRow.push(0);
+				markRow.push(false);
+			}
+			tilesOwner.push(ownerRow);
+			tilesMark.push(markRow);
 		}
-		this.setState({ tilesMark });
+		this.setState({ tilesOwner, tilesMark });
 	}
 
 	render() {
-		const { diceValues, position, tilesMark } = this.state;
+		const { diceValues, position, tilesOwner, tilesMark } = this.state;
 		const {
 			throwDices,
 			handleClick
 		} = this;
 
-		console.log("현재 위치:", position);
+		console.log("현재 좌표:", position);
 		console.log("후보 좌표:", this.state.candidatePos);
-		console.log("tilesMark:", tilesMark);
+		// console.log("tilesMark:", tilesMark);
 
 		return (
 			<div className="container">
@@ -159,9 +174,10 @@ class Game extends React.Component {
 				</button>
 				<div className="mapContainer">
 					<Map
+					tilesOwner={tilesOwner}
 					tilesMark={tilesMark}
 					handleClick={handleClick} />
-					<Marker id={1} position={position} />
+					<Marker owner={1} position={position} />
 				</div>
 			</div>
 		)

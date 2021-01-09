@@ -8,7 +8,7 @@ class Map extends React.Component {
 	}
 
 	render() {
-		const { tilesMark, handleClick } = this.props;
+		const { tilesOwner, tilesMark, handleClick } = this.props;
 		console.log("Map: render");
 
 		return (
@@ -22,7 +22,7 @@ class Map extends React.Component {
 							key={i}
 							onClick={e => handleClick(e, i, j)}>
 								<Tile
-								owner={0}
+								owner={tilesOwner[j][i]}
 								isMark={mark} />
 							</div>
 						))}
