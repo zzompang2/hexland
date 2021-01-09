@@ -6,13 +6,8 @@ const WIDTH = 20;
 const HEIGHT = 20;
 
 class Marker extends React.Component {
-	state = {
-		id: this.props.id,
-		position: this.props.position
-	}
-
 	componentDidMount() {
-		const { id } = this.state;
+		const { id } = this.props;
 
 		var canvas = document.getElementById(`marker${id}`);
 		if (canvas.getContext) {
@@ -28,9 +23,16 @@ class Marker extends React.Component {
 		marker.width = 200;
 	}
 
+	shouldComponentUpdate(newProps) {
+		if(newProps.position.x !== this.props.position.x ||
+			 newProps.position.y !== this.props.position.y)
+			return true;
+		return false;
+	}
+
 	render() {
 		console.log("Marker: render");
-		const { id, position } = this.state;
+		const { id, position } = this.props;
 
 		const styles = {
 			top: position.y * HEIGHT,

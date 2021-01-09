@@ -1,8 +1,8 @@
-/* .tiles_column {
-	display: flex;
-	flex-direction: column;
-} */
+.tiles_column {
+	font-size: 0;
+}
 
 .tiles_row {
 	display: flex;
+	background-color: red;
 }

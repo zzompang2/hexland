@@ -9,58 +9,99 @@ const startPosition = {x: Math.floor(mapSize.x/2), y: Math.floor(mapSize.y/2)};
 class Game extends React.Component {
 	state = {
 		mapSize: mapSize,
-		diceValues: [0, 0],
 		position: startPosition,
-		candidatePos: [undefined, undefined],
-		tilesMark: []
+		diceValues: [0, 0],
+		tilesMark: [],
+		candidatePos: [undefined, undefined]
 	}
 
 	throwDices = () => {
 		console.log("주사위 던짐!");
-		const { position, candidatePos, tilesMark } = this.state;
+		const { position, tilesMark, candidatePos } = this.state;
+		if(candidatePos[0] !== undefined) {
+			console.log("이동할 좌표 선택해 주세요.");
+			return;
+		}
 
 		const one = Math.floor(Math.random() * 4) + 1;
 		const two = Math.floor(Math.random() * 4) + 1;
+		let x, y;
 
 		switch(one) {
-			case(1):
-			candidatePos[0] = {x: position.x, y: position.y - two};
+			case 1:
+				x = position.x;
+				y = position.y - two;
 			break;
-			case(2):
-			candidatePos[0] = {x: position.x + two, y: position.y};
+			case 2:
+				x = position.x + two;
+				y = position.y;
 			break;
-			case(3):
-			candidatePos[0] = {x: position.x, y: position.y + two};
+			case 3:
+				x = position.x;
+				y = position.y + two;
 			break;
-			case(4):
-			candidatePos[0] = {x: position.x - two, y: position.y};
+			case 4:
+				x = position.x - two;
+				y = position.y;
 			break;
+			default:
+				return;
 		}
-		tilesMark[candidatePos[0].y][candidatePos[0].x] = true;
+
+		candidatePos[0] = {x, y};
+		tilesMark[y][x] = true;
 
 		if(one !== two) {
 			switch(two) {
-				case(1):
-				candidatePos[1] = {x: position.x, y: position.y - one};
+				case 1:
+					x = position.x;
+					y = position.y - two;
 				break;
-				case(2):
-				candidatePos[1] = {x: position.x + one, y: position.y};
+				case 2:
+					x = position.x + two;
+					y = position.y;
 				break;
-				case(3):
-				candidatePos[1] = {x: position.x, y: position.y + one};
+				case 3:
+					x = position.x;
+					y = position.y + two;
 				break;
-				case(4):
-				candidatePos[1] = {x: position.x - one, y: position.y};
+				case 4:
+					x = position.x - two;
+					y = position.y;
 				break;
+				default:
+					return;
 			}
-			tilesMark[candidatePos[1].y][candidatePos[1].x] = true;
+			candidatePos[1] = {x, y};
+			tilesMark[y][x] = true;
 		}
 
-		this.setState({ diceValues: [one, two], candidatePos, tilesMark });
+		this.setState({ diceValues: [one, two], tilesMark, candidatePos });
 	}
 
-	handleClick = (e) => {
-		console.log("click:", e.target.id);
+	handleClick = (e, x, y) => {
+		const { tilesMark, candidatePos } = this.state;
+		console.log("click:", x, y);
+
+		if(candidatePos[0] === undefined)
+			return;
+
+		let newPosition;
+
+		if(candidatePos[0].x === x && candidatePos[0].y === y)
+			newPosition = candidatePos[0];
+		else if(candidatePos !== undefined) {
+			if(candidatePos[1].x === x && candidatePos[1].y === y)
+				newPosition = candidatePos[1];
+			else
+				return;
+			tilesMark[candidatePos[1].y][candidatePos[1].x] = false;
+		}
+		else
+			return;
+
+		tilesMark[candidatePos[0].y][candidatePos[0].x] = false;
+		this.setState({ position: newPosition, diceValues: [0, 0], tilesMark, candidatePos: [undefined, undefined] });
 	// 	const { x, y } = e.target.id;
 	// 	const { candidatePos, tiles } = this.state;
 

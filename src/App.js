@@ -1,6 +1,7 @@
 import { HashRouter, Route } from "react-router-dom";
 import Home from "./routes/Home";
 import Game from "./routes/Game";
+import "./App.css"
 
 function App() {
   return (
