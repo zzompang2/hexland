@@ -10,7 +10,6 @@ class Map extends React.Component {
 	render() {
 		const { tilesMark, handleClick } = this.props;
 		console.log("Map: render");
-		console.log(tilesMark);
 
 		return (
 			<div className="tiles_column">

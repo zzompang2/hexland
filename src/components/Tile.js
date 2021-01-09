@@ -79,10 +79,8 @@ class Tile extends React.Component {
 		const { isMark } = this.props;
 		console.log("Tile: render");
 
-		if (isMark){
-			// console.log(this.state, this.props);
+		if (isMark)
 			this.mark();
-		}
 		else
 			this.draw();
 
