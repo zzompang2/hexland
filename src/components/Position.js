@@ -1,12 +1,13 @@
 import React, { createRef } from "react";
-import "./Tile.css";
+import "./Position.css";
 
-const ownerColors = ["#e0e0e0", "red", "blue", "green"];
+const ownerColors = ["#909090", "red", "blue", "green"];
 const WIDTH = 20;
 const HEIGHT = 20;
 
-class Tile extends React.Component {
+class Position extends React.Component {
 	state = {
+		connections: [false, false, false, false],
 		canvasRef: createRef()
 	}
 
@@ -21,13 +22,13 @@ class Tile extends React.Component {
 			// 캔버스 지우기
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-			// 검정테두리
-			ctx.fillStyle = "#909090";
-			ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-			// 사각형
-			ctx.fillStyle = ownerColors[owner];
-			ctx.fillRect(.5, .5, WIDTH-1, HEIGHT-1);
+			if(owner !== 0) {
+				// 원
+				let circle = new Path2D();
+				circle.arc(WIDTH/2, HEIGHT/2, 3, 0, 2 * Math.PI);
+				ctx.fillStyle = ownerColors[owner];
+				ctx.fill(circle);
+			}
 		}
 	}
 
@@ -43,18 +44,16 @@ class Tile extends React.Component {
 			// 캔버스 지우기
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-			// 검정테두리
-			ctx.fillStyle = "black";
-			ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-			// 사각형
-			ctx.fillStyle = ownerColors[owner];
-			ctx.fillRect(1, 1, WIDTH-2, HEIGHT-2);
-
-			// 원
-			var circle = new Path2D();
-			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/4, 0, 2 * Math.PI);
+			// 테두리 원
+			let circle = new Path2D();
+			circle.arc(WIDTH/2, HEIGHT/2, 6, 0, 2 * Math.PI);
 			ctx.fillStyle = ownerColors[3];
+			ctx.fill(circle);
+
+			// owner 원
+			circle = new Path2D();
+			circle.arc(WIDTH/2, HEIGHT/2, 3, 0, 2 * Math.PI);
+			ctx.fillStyle = ownerColors[owner];
 			ctx.fill(circle);
 		}
 	}
@@ -64,11 +63,10 @@ class Tile extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps) {
-		// const { owner, isMark } = this.props;
-		// const { owner: owner_, isMark: isMark_ } = nextProps;
+		const { owner, isMark } = this.props;
+		const { owner: owner_, isMark: isMark_ } = nextProps;
 
-		// if (owner !== owner_ || isMark !== isMark_)
-		if(this.props.owner !== nextProps.owner)
+		if (owner !== owner_ || isMark !== isMark_)
 			return true;
 		else
 			return false;
@@ -76,17 +74,17 @@ class Tile extends React.Component {
 
 	render() {
 		const { canvasRef } = this.state;
-		// const { isMark } = this.props;
+		const { isMark } = this.props;
 		console.log("Tile: render");
 
-		// if (isMark)
-		// 	this.mark();
-		// else
+		if (isMark)
+			this.mark();
+		else
 			this.draw();
 
 		return (
 			<canvas
-			className="tile"
+			className="pos"
 			ref={canvasRef}
 			width={WIDTH} 
 			height={HEIGHT} />
@@ -94,4 +92,4 @@ class Tile extends React.Component {
 	}
 }
 
-export default Tile;
+export default Position;

@@ -18,12 +18,12 @@ class Marker extends React.Component {
 			let ctx = canvas.getContext('2d');
 			let circle = new Path2D();
 
-			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2, 0, 2 * Math.PI);
+			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-3, 0, 2 * Math.PI);
 			ctx.fillStyle = "black";
 			ctx.fill(circle);
 
 			circle = new Path2D();
-			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-2, 0, 2 * Math.PI);
+			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-5, 0, 2 * Math.PI);
 			ctx.fillStyle = ownerColors[owner];
 			ctx.fill(circle);
 		}

@@ -1,8 +1,20 @@
+.pos_column,
 .tiles_column {
+	position: absolute;
 	font-size: 0;
 }
 
+.pos_column {
+	left: 0;
+	top: 0;
+}
+
+.tiles_column {
+	left: 10;
+	top: 10;
+}
+
+.pos_row,
 .tiles_row {
 	display: flex;
-	background-color: red;
 }

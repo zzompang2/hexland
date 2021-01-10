@@ -1,10 +1,11 @@
 import React from "react";
-import Map from "../components/Map";
+import MapTile from "../components/MapTile";
+import MapPosition from "../components/MapPosition";
 import Marker from "../components/Marker";
 import "./Game.css";
 
 const mapSize = {x: 20, y: 20};
-const startPosition = {x: Math.floor(mapSize.x/2), y: Math.floor(mapSize.y/2)};
+const startPosition = {x: Math.floor((mapSize.x+1)/2), y: Math.floor((mapSize.y+1)/2)};
 
 class Game extends React.Component {
 	state = {
@@ -12,13 +13,16 @@ class Game extends React.Component {
 		position: startPosition,
 		diceValues: [],
 		tilesOwner: [],
-		tilesMark: [],
+		positionsOwner: [],
+		positionsMark: [],
 		candidatePos: []
 	}
 
 	throwDices = () => {
 		console.log("주사위 던짐!");
-		const { mapSize: {x: mapX, y: mapY}, position, tilesMark, candidatePos } = this.state;
+		const { mapSize: {x: mapX, y: mapY}, position, positionsMark, candidatePos } = this.state;
+		const maxX = mapX;
+		const maxY = mapY;
 
 		if(candidatePos.length !== 0) {
 			console.log("이동할 좌표 선택해 주세요.");
@@ -37,12 +41,12 @@ class Game extends React.Component {
 				y = position.y - two < 0 ? 0 : position.y - two;
 				break;
 			case 2:
-				x = position.x + two >= mapX ? mapX - 1 : position.x + two;
+				x = position.x + two > maxX ? maxX : position.x + two;
 				y = position.y;
 				break;
 			case 3:
 				x = position.x;
-				y = position.y + two >= mapY ? mapY - 1 : position.y + two;
+				y = position.y + two > maxY ? maxY : position.y + two;
 				break;
 			case 4:
 				x = position.x - two < 0 ? 0 : position.x - two;
@@ -56,7 +60,7 @@ class Game extends React.Component {
 			console.log("현재 위치랑 같음!");
 		else {
 			candidatePos.push({x, y});
-			tilesMark[y][x] = true;
+			positionsMark[y][x] = true;
 		}
 
 		if(one !== two) {
@@ -66,12 +70,12 @@ class Game extends React.Component {
 					y = position.y - one < 0 ? 0 : position.y - one;
 					break;
 				case 2:
-					x = position.x + one >= mapX ? mapX - 1 : position.x + one;
+					x = position.x + one > maxX ? maxX : position.x + one;
 					y = position.y;
 					break;
 				case 3:
 					x = position.x;
-					y = position.y + one >= mapY ? mapY - 1 : position.y + one;
+					y = position.y + one > maxY ? maxY : position.y + one;
 					break;
 				case 4:
 					x = position.x - one < 0 ? 0 : position.x - one;
@@ -85,18 +89,18 @@ class Game extends React.Component {
 				console.log("현재 위치랑 같음!");
 			else {
 				candidatePos.push({x, y});
-				tilesMark[y][x] = true;
+				positionsMark[y][x] = true;
 			}
 		}
 
 		if(candidatePos.length === 0)
 			return;
 
-		this.setState({ diceValues: [one, two], tilesMark, candidatePos });
+		this.setState({ diceValues: [one, two], positionsMark, candidatePos });
 	}
 
 	handleClick = (e, x, y) => {
-		const { position, tilesOwner, tilesMark, candidatePos } = this.state;
+		const { position, positionsOwner, positionsMark, candidatePos } = this.state;
 		console.log("타일 클릭:", x, y);
 
 		if(candidatePos.length === 0)
@@ -115,42 +119,50 @@ class Game extends React.Component {
 			return;
 		
 		console.log("이동한 좌표:", newPosition);
-		candidatePos.map(pos => { tilesMark[pos.y][pos.x] = false; })
+		candidatePos.map(pos => { 
+			positionsMark[pos.y][pos.x] = false;
+		 })
 
 		if(position.x !== newPosition.x) {
 			const min = Math.min(position.x, newPosition.x);
 			const max = Math.max(position.x, newPosition.x);
 			for(let i=min; i<=max; i++)
-				tilesOwner[position.y][i] = 1;
+				positionsOwner[position.y][i] = 1;
 		}
 		else {
 			const min = Math.min(position.y, newPosition.y);
 			const max = Math.max(position.y, newPosition.y);
 			for(let i=min; i<=max; i++)
-				tilesOwner[i][position.x] = 1;
+				positionsOwner[i][position.x] = 1;
 		}
-		this.setState({ position: newPosition, diceValues: [], tilesOwner, tilesMark, candidatePos: [] });
+		this.setState({ position: newPosition, diceValues: [], positionsOwner, positionsMark, candidatePos: [] });
 	}
 
 	componentDidMount() {
-		const { tilesOwner, tilesMark, mapSize: {x, y} } = this.state;
+		const { tilesOwner, positionsMark, positionsOwner, mapSize: {x, y} } = this.state;
 
-		for (let j=0; j<y; j++) {
-			const ownerRow = [];
+		for (let j=0; j<y+1; j++) {
+			const tilesOwnerRow = [];
 			const markRow = [];
+			const positionsOwnerRow = [];
 
-			for (let i=0; i<x; i++) {
-				ownerRow.push(0);
+			for (let i=0; i<x+1; i++) {
+				tilesOwnerRow.push(0);
 				markRow.push(false);
+				positionsOwnerRow.push(0);
 			}
-			tilesOwner.push(ownerRow);
-			tilesMark.push(markRow);
+			tilesOwnerRow.pop();
+
+			tilesOwner.push(tilesOwnerRow);
+			positionsOwner.push(positionsOwnerRow);
+			positionsMark.push(markRow);
 		}
-		this.setState({ tilesOwner, tilesMark });
+		tilesOwner.pop();
+		this.setState({ tilesOwner, positionsMark, positionsOwner });
 	}
 
 	render() {
-		const { diceValues, position, tilesOwner, tilesMark } = this.state;
+		const { diceValues, position, tilesOwner, positionsMark, positionsOwner } = this.state;
 		const {
 			throwDices,
 			handleClick
@@ -158,7 +170,6 @@ class Game extends React.Component {
 
 		console.log("현재 좌표:", position);
 		console.log("후보 좌표:", this.state.candidatePos);
-		// console.log("tilesMark:", tilesMark);
 
 		return (
 			<div className="container">
@@ -173,9 +184,10 @@ class Game extends React.Component {
 					주사위 던지기
 				</button>
 				<div className="mapContainer">
-					<Map
-					tilesOwner={tilesOwner}
-					tilesMark={tilesMark}
+				<MapTile tilesOwner={tilesOwner} />
+				<MapPosition
+					positionsOwner={positionsOwner}
+					positionsMark={positionsMark}
 					handleClick={handleClick} />
 					<Marker owner={1} position={position} />
 				</div>
