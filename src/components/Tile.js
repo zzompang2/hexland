@@ -32,7 +32,6 @@ class Tile extends React.Component {
 	}
 
 	mark() {
-		console.log("mark");
 		let { canvasRef } = this.state;
 		const { owner } = this.props;
 		let canvas = canvasRef.current;
@@ -64,25 +63,14 @@ class Tile extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps) {
-		// const { owner, isMark } = this.props;
-		// const { owner: owner_, isMark: isMark_ } = nextProps;
-
-		// if (owner !== owner_ || isMark !== isMark_)
-		if(this.props.owner !== nextProps.owner)
-			return true;
-		else
-			return false;
+		return (this.props.owner !== nextProps.owner);
 	}
 
 	render() {
 		const { canvasRef } = this.state;
-		// const { isMark } = this.props;
 		console.log("Tile: render");
 
-		// if (isMark)
-		// 	this.mark();
-		// else
-			this.draw();
+		this.draw();
 
 		return (
 			<canvas

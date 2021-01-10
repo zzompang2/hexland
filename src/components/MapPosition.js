@@ -9,7 +9,7 @@ class MapPosition extends React.Component {
 
 	render() {
 		const { positionsMark, handleClick, positionsOwner } = this.props;
-		console.log("MapPosition: render");
+		// console.log("MapPosition: render");
 
 		return (
 			<div className="pos_column">

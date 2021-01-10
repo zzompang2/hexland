@@ -75,7 +75,7 @@ class Position extends React.Component {
 	render() {
 		const { canvasRef } = this.state;
 		const { isMark } = this.props;
-		console.log("Tile: render");
+		console.log("Position: render");
 
 		if (isMark)
 			this.mark();
