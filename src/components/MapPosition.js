@@ -8,22 +8,20 @@ class MapPosition extends React.Component {
 	}
 
 	render() {
-		const { positionsMark, handleClick, positionsOwner } = this.props;
+		const { positionsMark, handleClick } = this.props;
 		// console.log("MapPosition: render");
 
 		return (
 			<div className="pos_column">
-				{positionsOwner.map((ownerRow, j) => (
+				{positionsMark.map((row, j) => (
 					<div 
 					key={j}
 					className="pos_row">
-						{ownerRow.map((owner, i) => (
+						{row.map((mark, i) => (
 							<div
 							key={i}
 							onClick={e => handleClick(e, i, j)}>
-								<Position
-								owner={owner}
-								isMark={positionsMark[j][i]} />
+								<Position isMark={mark} />
 							</div>
 						))}
 					</div>

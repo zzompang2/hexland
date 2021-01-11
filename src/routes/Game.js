@@ -7,271 +7,217 @@ import "./Game.css";
 const mapSize = {x: 10, y: 10};
 const startPosition = {x: Math.floor((mapSize.x+1)/2), y: Math.floor((mapSize.y+1)/2)};
 
+const forDebug = [[2,2], [1,2], [4,2], [3,2]];
+
 class Game extends React.Component {
 	state = {
 		mapSize: mapSize,
 		position: startPosition,
 		diceValues: [],
 		tilesOwner: [],
-		positionsOwner: [],
 		positionsMark: [],
 		candidatePos: [],
 		lineOwner: []
 	}
 
+	/**
+	 * 주사위를 던져 두 개의 랜덤한 숫자를 출력하고 이동할 수 있는 위치를 표시한다.
+	 * 주사위 하나는 방향(UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4),
+	 * 나머지 하나는 거리로 한다.
+	 */
 	throwDices = () => {
-		const { mapSize: {x: mapX, y: mapY}, position, positionsMark, candidatePos } = this.state;
-		const maxX = mapX;
-		const maxY = mapY;
+		const { mapSize, position, positionsMark, candidatePos } = this.state;
 
+		// 이미 주사위를 던진 경우
 		if(candidatePos.length !== 0) {
 			console.log("이동할 좌표 선택해 주세요.");
 			
-			// 주사위 초기화 (for debug)
-			candidatePos.map(pos => {  
-				positionsMark[pos.y][pos.x] = false;
-			});
+			// === 주사위 초기화 (for debug) ===
+			candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
 			this.setState({ diceValues: [], positionsMark, candidatePos: [] });
-			// =====================
+			// =============================
 
 			return;
 		}
 
-		const one = Math.floor(Math.random() * 4) + 1;
-		const two = Math.floor(Math.random() * 4) + 1;
-		console.log("주사위 결과:", one, two);
+		// 주사위 결과
+		const diceValues = [
+			Math.floor(Math.random() * 4) + 1, 
+			Math.floor(Math.random() * 4) + 1];
 
-		let x, y;
+		// const diceValues = forDebug.pop();
 
-		switch(one) {
-			case 1:
-				x = position.x;
-				y = position.y - two < 0 ? 0 : position.y - two;
-				break;
-			case 2:
-				x = position.x + two > maxX ? maxX : position.x + two;
-				y = position.y;
-				break;
-			case 3:
-				x = position.x;
-				y = position.y + two > maxY ? maxY : position.y + two;
-				break;
-			case 4:
-				x = position.x - two < 0 ? 0 : position.x - two;
-				y = position.y;
-				break;
-			default:
-				return;
-		}
-		console.log("계산한 후보좌표:", x, y);
-		if(JSON.stringify(position) === JSON.stringify({x, y}))
-			console.log("현재 위치랑 같음!");
-		else {
-			candidatePos.push({x, y});
-			positionsMark[y][x] = true;
-		}
-
-		if(one !== two) {
-			switch(two) {
+		/**
+		 * DIR 방향으로 DIS 거리 이동할 때 도착하는 곳의 좌표를
+		 * 후보(candidatePos)에 추가하고 맵에 표시(positionsMark)한다.
+		 */
+		function addCandidatePos(dir, dis) {
+			let candX, candY;		// 이동 가능한 좌표
+			switch(dir) {
 				case 1:
-					x = position.x;
-					y = position.y - one < 0 ? 0 : position.y - one;
+					candX = position.x;
+					candY = Math.max(position.y - dis, 0);
 					break;
 				case 2:
-					x = position.x + one > maxX ? maxX : position.x + one;
-					y = position.y;
+					candX = Math.min(position.x + dis, mapSize.x);
+					candY = position.y;
 					break;
 				case 3:
-					x = position.x;
-					y = position.y + one > maxY ? maxY : position.y + one;
+					candX = position.x;
+					candY = Math.min(position.y + dis, mapSize.y);
 					break;
 				case 4:
-					x = position.x - one < 0 ? 0 : position.x - one;
-					y = position.y;
+					candX = Math.max(position.x - dis, 0);
+					candY = position.y;
 					break;
 				default:
 					return;
 			}
-			console.log("계산한 후보좌표:", x, y);
-			if(JSON.stringify(position) === JSON.stringify({x, y}))
-				console.log("현재 위치랑 같음!");
-			else {
-				candidatePos.push({x, y});
-				positionsMark[y][x] = true;
+			// 현재 위치와 다른 경우에만 후보에 추가
+			if(position.x !== candX || position.y !== candY) {
+				candidatePos.push({x: candX, y: candY});
+				positionsMark[candY][candX] = true;
 			}
-		}
+		};
+		
+		addCandidatePos(diceValues[0], diceValues[1]);
+		if(diceValues[0] !== diceValues[1])
+			addCandidatePos(diceValues[1], diceValues[0]);
 
 		if(candidatePos.length === 0)
 			return;
 
-		this.setState({ diceValues: [one, two], positionsMark, candidatePos });
+		this.setState({ diceValues, positionsMark, candidatePos });
 	}
 
 	/**
-	 * 
-	 * @param {number} startX 
-	 * @param {number} startY 
-	 * @param {number} direction 1 ~ 4. 상우하좌
+	 * 파라미터로 들어온 선을 포함하는 닫힌 경로를 찾는다. 
+	 * 그리고 그 경로 내부의 TILE 들의 OWNER 로 설정한다.
+	 * @param {number} startX 선의 시작점 X 좌표
+	 * @param {number} startY 선의 시작점 Y 좌표
+	 * @param {number} direction 시작점에서 부터 방향 (1~4:상우하좌)
 	 */
 	fillTiles(startX, startY, direction) {
 		console.log("타일 채우기:", startX, startY, direction);
 		const { mapSize, lineOwner } = this.state;
-		const lineOwnerCopy = [];
-		const closedShapeLines = [];
-		let x = startX;
-		let y = startY;
+		const lineOwnerCopy = [];				// for finding closed shape
+		const lineOwnerCopy2 = [];			// for finding tiles to fill
+		const closedShapeLines = [];		// 닫힌 경로를 구성하는 line
+		let preX = startX;
+		let preY = startY;
 		let dir = direction;
+		const shouldFillTiles = [];			// 칠해야 하는 타일
 
-		lineOwner.map(row => {
+		// deep copy
+		lineOwner.forEach(row => {
 			const rowCopy = [];
-			row.map(owner => {rowCopy.push({...owner})});
+			const rowCopy2 = [];
+			row.forEach(owner => {
+				rowCopy.push({...owner});
+				rowCopy2.push({...owner});
+			});
 			lineOwnerCopy.push(rowCopy);
+			lineOwnerCopy2.push(rowCopy2);
 		});
 
-		closedShapeLines.push({x: startX, y: startY, dir: dir});
+		/**
+		 * (curX, curY) 를 꼭짓점으로 하는 선이 있는지 확인하고
+		 * 있으면 preX, preY, dir 를 업데이트하고 closed shape 를 구성하는 선에 넣는다.
+		 * 연결되어 있는 선이 하나도 없다면 closed shape 를 구성하지 않는 선이므로 제외.
+		 */
+		function check(curX, curY, up, right, down, left) {
+			if(up && curY > 0 && lineOwnerCopy[curY-1][curX].left === 1) {
+				lineOwnerCopy[curY-1][curX].left = 0;
+				preX = curX;
+				preY = curY;
+				dir = 1;
+				closedShapeLines.push({x: curX, y: curY, dir});
+			}
+			else if(right && lineOwnerCopy[curY][curX].top === 1) {
+				lineOwnerCopy[curY][curX].top = 0;
+				preX = curX;
+				preY = curY;
+				dir = 2;
+				closedShapeLines.push({x: curX, y: curY, dir});
+			}
+			else if(down && lineOwnerCopy[curY][curX].left === 1) {
+				lineOwnerCopy[curY][curX].left = 0;
+				preX = curX;
+				preY = curY;
+				dir = 3;
+				closedShapeLines.push({x: curX, y: curY, dir});
+			}
+			else if(left && curX > 0 && lineOwnerCopy[curY][curX-1].top === 1) {
+				lineOwnerCopy[curY][curX-1].top = 0;
+				preX = curX;
+				preY = curY;
+				dir = 4;
+				closedShapeLines.push({x: curX, y: curY, dir});
+			}
+			else {
+				closedShapeLines.pop();
+				// 순환이 없는 경우
+				if(closedShapeLines.length === 0)
+					return false;
+				const last = closedShapeLines[closedShapeLines.length-1];
+				preX = last.x;
+				preY = last.y;
+				dir = last.dir;
+			}
+			return true;
+		}
 
-		for(let i = 0; i<100; i++) {
+		closedShapeLines.push({x: preX, y: preY, dir});
+
+		while(true) {
+			console.log(preX, preY, dir);
+			// UP 방향의 선인 경우: 위, 오른쪽, 왼쪽과 연결되어 있는지 확인
 			if(dir === 1) {
-				if(lineOwnerCopy[y-2][x].left === 1) {
-					lineOwnerCopy[y-2][x].left = 0;
-					y = y-1;
-					dir = 1;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y-1][x].top === 1) {
-					lineOwnerCopy[y-1][x].top = 0;
-					y = y-1;
-					dir = 2;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y-1][x-1].top === 1) {
-					lineOwnerCopy[y-1][x-1].top = 0;
-					y = y-1;
-					dir = 4;
-					closedShapeLines.push({x, y, dir});
-				}
-				else {
-					console.log("back");
-					closedShapeLines.pop();
-					// 순환이 없는 경우
-					if(closedShapeLines.length === 0) break;
-					const last = closedShapeLines[closedShapeLines.length-1];
-					x = last.x;
-					y = last.y;
-					dir = last.dir;
-				}
+				if(!check(preX, preY-1, true, true, false, true))
+					break;
 			}
+			// RIGHT 방향의 선인 경우: 위, 오른쪽, 아래와 연결되어 있는지 확인
 			else if(dir === 2) {
-				if(lineOwnerCopy[y-1][x+1].left === 1) {
-					lineOwnerCopy[y-1][x+1].left = 0;
-					x = x+1;
-					dir = 1;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y][x+1].top === 1) {
-					lineOwnerCopy[y][x+1].top = 0;
-					x = x+1;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y][x+1].left === 1) {
-					lineOwnerCopy[y][x+1].left = 0;
-					x = x+1;
-					dir = 3;
-					closedShapeLines.push({x, y, dir});
-				}
-				else {
-					closedShapeLines.pop();
-					// 순환이 없는 경우
-					if(closedShapeLines.length === 0) break;
-					const last = closedShapeLines[closedShapeLines.length-1];
-					x = last.x;
-					y = last.y;
-					dir = last.dir;
-				}
+				if(!check(preX+1, preY, true, true, true, false))
+					break;
 			}
+			// DOWN 방향의 선인 경우: 오른쪽, 아래, 왼쪽과 연결되어 있는지 확인
 			else if(dir === 3) {
-				if(lineOwnerCopy[y+1][x].top === 1) {
-					lineOwnerCopy[y+1][x].top = 0;
-					y = y+1;
-					dir = 2;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y+1][x].left === 1) {
-					lineOwnerCopy[y+1][x].left = 0;
-					y = y+1;
-					dir = 3;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y+1][x-1].top === 1) {
-					lineOwnerCopy[y+1][x-1].top = 0;
-					y = y+1;
-					dir = 4;
-					closedShapeLines.push({x, y, dir});
-				}
-				else {
-					closedShapeLines.pop();
-					// 순환이 없는 경우
-					if(closedShapeLines.length === 0) break;
-					const last = closedShapeLines[closedShapeLines.length-1];
-					x = last.x;
-					y = last.y;
-					dir = last.dir;
-				}
+				if(!check(preX, preY+1, false, true, true, true))
+					break;
 			}
+			// LEFT 방향의 선인 경우: 위, 아래, 왼쪽과 연결되어 있는지 확인
 			else if(dir === 4) {
-				if(lineOwnerCopy[y-1][x-1].left === 1) {
-					lineOwnerCopy[y-1][x-1].left = 0;
-					x = x-1;
-					dir = 1;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y][x-1].left === 1) {
-					lineOwnerCopy[y][x-1].left = 0;
-					x = x-1;
-					dir = 3;
-					closedShapeLines.push({x, y, dir});
-				}
-				else if(lineOwnerCopy[y][x-2].top === 1) {
-					lineOwnerCopy[y][x-2].top = 0;
-					x = x-1;
-					dir = 4;
-					closedShapeLines.push({x, y, dir});
-				}
-				else {
-					closedShapeLines.pop();
-
-					// 순환이 없는 경우
-					if(closedShapeLines.length === 0) break;
-
-					const last = closedShapeLines[closedShapeLines.length-1];
-					x = last.x;
-					y = last.y;
-					dir = last.dir;
-				}
+				if(!check(preX-1, preY, true, false, true, true))
+					break;
 			}
 
 			// 시작했던 line 으로 돌아온 경우, 순환이 있다는 뜻
-			if(closedShapeLines.length !== 1 && x === startX && y === startY && dir === direction)
+			if(closedShapeLines.length !== 1 && preX === startX && preY === startY && dir === direction)
 				break;
 		}
 
-		let minX = closedShapeLines[0];
-		for(let i=1; i<closedShapeLines.length; i++)
-			if(minX.x > closedShapeLines[i].x)
-				minX = closedShapeLines[i];
+		console.log(closedShapeLines);
 
-		const shouldFillTiles = [];
-		const lineOwnerCopy2 = [];
-		lineOwner.map(row => {
-			const rowCopy = [];
-			row.map(owner => {rowCopy.push({...owner})});
-			lineOwnerCopy2.push(rowCopy);
-		});
+		if(closedShapeLines.length === 0)
+			return [];
 
-		shouldFillTiles.push( {x: minX.x, y: minX.y} );
+		// 확실히 칠해지는 한 타일을 찾기 위해, 가장 왼쪽에 있는 타일을 찾는다.
+		let mostLeftTile = {...mapSize};
+		for(let i=0; i<closedShapeLines.length; i++)
+			if(mostLeftTile.x > closedShapeLines[i].x) {
+				if(closedShapeLines[i].dir === 1)
+					mostLeftTile = {...closedShapeLines[i], y: closedShapeLines[i].y-1};
+				else if(closedShapeLines[i].dir === 3)
+					mostLeftTile = {...closedShapeLines[i]};
+			}
 
-		for(let i=0; i < shouldFillTiles.length; i++) {
+		shouldFillTiles.push( mostLeftTile );
+
+		// mostLeftTile 을 시작으로 인접한 타일을 칠하고 배열에 추가
+		for(let i=0; i<shouldFillTiles.length; i++) {
 			const tile = shouldFillTiles[i];
+			console.log("타일:", tile);
 			if(lineOwnerCopy2[tile.y][tile.x].top !== 1) {
 				lineOwnerCopy2[tile.y][tile.x].top = 1;
 				shouldFillTiles.push({x: tile.x, y: tile.y-1});
@@ -295,7 +241,7 @@ class Game extends React.Component {
 	}
 
 	handleClick = (e, x, y) => {
-		const { mapSize, position, tilesOwner, positionsOwner, positionsMark, candidatePos, lineOwner } = this.state;
+		const { mapSize, position, tilesOwner, positionsMark, candidatePos, lineOwner } = this.state;
 		let newPosition;
 		const shouldFillTiles = [];
 		
@@ -368,47 +314,39 @@ class Game extends React.Component {
 			}
 		}
 		console.log("칠해야 하는 타일:", shouldFillTiles);
-		shouldFillTiles.map(tile => {
-			tilesOwner[tile.y][tile.x] = 1;
-		});
-		this.setState({ position: newPosition, diceValues: [], tilesOwner, positionsOwner, positionsMark, candidatePos: [], lineOwner });
+		shouldFillTiles.forEach(tile => tilesOwner[tile.y][tile.x] = 1);
+		this.setState({ position: newPosition, diceValues: [], tilesOwner, positionsMark, candidatePos: [], lineOwner });
 	}
 
 	componentDidMount() {
-		const { tilesOwner, positionsMark, positionsOwner, mapSize: {x, y}, lineOwner } = this.state;
+		const { tilesOwner, positionsMark, mapSize: {x, y}, lineOwner } = this.state;
 
 		for (let j=0; j<=y; j++) {
 			const tilesOwnerRow = [];
 			const markRow = [];
-			const positionsOwnerRow = [];
 			const lineOwnerRow = [];
 
 			for (let i=0; i<=x; i++) {
 				tilesOwnerRow.push(0);
 				markRow.push(false);
-				positionsOwnerRow.push(0);
 				lineOwnerRow.push({top: 0, left: 0});
 			}
 			// tilesOwnerRow.pop();
 
 			tilesOwner.push(tilesOwnerRow);
-			positionsOwner.push(positionsOwnerRow);
 			positionsMark.push(markRow);
 			lineOwner.push(lineOwnerRow);
 		}
 		// tilesOwner.pop();
-		this.setState({ tilesOwner, positionsMark, positionsOwner, lineOwner });
+		this.setState({ tilesOwner, positionsMark, lineOwner });
 	}
 
 	render() {
-		const { mapSize, diceValues, position, tilesOwner, positionsMark, positionsOwner, lineOwner } = this.state;
+		const { mapSize, diceValues, position, tilesOwner, positionsMark, lineOwner } = this.state;
 		const {
 			throwDices,
 			handleClick
 		} = this;
-
-		// console.log("현재 좌표:", position);
-		// console.log("후보 좌표:", this.state.candidatePos);
 
 		return (
 			<div className="container">
@@ -425,7 +363,6 @@ class Game extends React.Component {
 				<div className="mapContainer">
 				<MapTile mapSize={mapSize} tilesOwner={tilesOwner} lineOwner={lineOwner} />
 				<MapPosition
-					positionsOwner={positionsOwner}
 					positionsMark={positionsMark}
 					handleClick={handleClick} />
 					<Marker owner={1} position={position} />
