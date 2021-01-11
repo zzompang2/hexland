@@ -1,7 +1,12 @@
 import React, { createRef } from "react";
 import "./Tile.css";
 
-const ownerColors = ["#e0e0e0", "red", "blue", "green"];
+const ownerColors = {
+	A: "red",
+	B: "blue",
+	no: "#e0e0e0",
+	mark: "green"
+};
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -28,10 +33,6 @@ class TileRight extends React.Component {
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = ownerColors[left];
 			ctx.stroke();
-
-			// 사각형
-			// ctx.fillStyle = ownerColors[0];
-			// ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
 
 			ctx.font = "10px gothic";
 			ctx.fillStyle = "black";

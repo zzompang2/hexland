@@ -1,7 +1,12 @@
 import React, { createRef } from "react";
 import "./Marker.css";
 
-const ownerColors = ["#e0e0e0", "red", "blue"];
+const ownerColors = {
+	A: "red",
+	B: "blue",
+	no: "#e0e0e0",
+	mark: "green"
+};
 const WIDTH = 20;
 const HEIGHT = 20;
 

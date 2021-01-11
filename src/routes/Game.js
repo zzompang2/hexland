@@ -7,7 +7,7 @@ import "./Game.css";
 const mapSize = {x: 10, y: 10};
 const startPosition = {x: Math.floor((mapSize.x+1)/2), y: Math.floor((mapSize.y+1)/2)};
 
-const forDebug = [[2,2], [1,2], [4,2], [3,2]];
+const teamName = "B";
 
 class Game extends React.Component {
 	state = {
@@ -33,8 +33,8 @@ class Game extends React.Component {
 			console.log("이동할 좌표 선택해 주세요.");
 			
 			// === 주사위 초기화 (for debug) ===
-			candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
-			this.setState({ diceValues: [], positionsMark, candidatePos: [] });
+			// candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
+			// this.setState({ diceValues: [], positionsMark, candidatePos: [] });
 			// =============================
 
 			return;
@@ -44,8 +44,6 @@ class Game extends React.Component {
 		const diceValues = [
 			Math.floor(Math.random() * 4) + 1, 
 			Math.floor(Math.random() * 4) + 1];
-
-		// const diceValues = forDebug.pop();
 
 		/**
 		 * DIR 방향으로 DIS 거리 이동할 때 도착하는 곳의 좌표를
@@ -126,28 +124,28 @@ class Game extends React.Component {
 		 * 연결되어 있는 선이 하나도 없다면 closed shape 를 구성하지 않는 선이므로 제외.
 		 */
 		function check(curX, curY, up, right, down, left) {
-			if(up && curY > 0 && lineOwnerCopy[curY-1][curX].left === 1) {
+			if(up && curY > 0 && lineOwnerCopy[curY-1][curX].left === teamName) {
 				lineOwnerCopy[curY-1][curX].left = 0;
 				preX = curX;
 				preY = curY;
 				dir = 1;
 				closedShapeLines.push({x: curX, y: curY, dir});
 			}
-			else if(right && lineOwnerCopy[curY][curX].top === 1) {
+			else if(right && lineOwnerCopy[curY][curX].top === teamName) {
 				lineOwnerCopy[curY][curX].top = 0;
 				preX = curX;
 				preY = curY;
 				dir = 2;
 				closedShapeLines.push({x: curX, y: curY, dir});
 			}
-			else if(down && lineOwnerCopy[curY][curX].left === 1) {
+			else if(down && lineOwnerCopy[curY][curX].left === teamName) {
 				lineOwnerCopy[curY][curX].left = 0;
 				preX = curX;
 				preY = curY;
 				dir = 3;
 				closedShapeLines.push({x: curX, y: curY, dir});
 			}
-			else if(left && curX > 0 && lineOwnerCopy[curY][curX-1].top === 1) {
+			else if(left && curX > 0 && lineOwnerCopy[curY][curX-1].top === teamName) {
 				lineOwnerCopy[curY][curX-1].top = 0;
 				preX = curX;
 				preY = curY;
@@ -218,20 +216,20 @@ class Game extends React.Component {
 		for(let i=0; i<shouldFillTiles.length; i++) {
 			const tile = shouldFillTiles[i];
 			console.log("타일:", tile);
-			if(lineOwnerCopy2[tile.y][tile.x].top !== 1) {
-				lineOwnerCopy2[tile.y][tile.x].top = 1;
+			if(lineOwnerCopy2[tile.y][tile.x].top !== teamName) {
+				lineOwnerCopy2[tile.y][tile.x].top = teamName;
 				shouldFillTiles.push({x: tile.x, y: tile.y-1});
 			}
-			if(lineOwnerCopy2[tile.y][tile.x].left !== 1) {
-				lineOwnerCopy2[tile.y][tile.x].left = 1;
+			if(lineOwnerCopy2[tile.y][tile.x].left !== teamName) {
+				lineOwnerCopy2[tile.y][tile.x].left = teamName;
 				shouldFillTiles.push({x: tile.x-1, y: tile.y});
 			}
-			if(lineOwnerCopy2[tile.y][tile.x+1].left !== 1) {
-				lineOwnerCopy2[tile.y][tile.x+1].left = 1;
+			if(lineOwnerCopy2[tile.y][tile.x+1].left !== teamName) {
+				lineOwnerCopy2[tile.y][tile.x+1].left = teamName;
 				shouldFillTiles.push({x: tile.x+1, y: tile.y});
 			}
-			if(lineOwnerCopy2[tile.y+1][tile.x].top !== 1) {
-				lineOwnerCopy2[tile.y+1][tile.x].top = 1;
+			if(lineOwnerCopy2[tile.y+1][tile.x].top !== teamName) {
+				lineOwnerCopy2[tile.y+1][tile.x].top = teamName;
 				shouldFillTiles.push({x: tile.x, y: tile.y+1});
 			}
 		};
@@ -270,20 +268,20 @@ class Game extends React.Component {
 			const next = position.x < newPosition.x ? 1 : -1;
 			for(let i=position.x; i !== newPosition.x; i=i+next) {
 				if(next === 1) {
-					if(lineOwner[position.y][i].top !== 1) {
-						lineOwner[position.y][i] = {...lineOwner[position.y][i], top: 1};
-						if((i < mapSize.x && (lineOwner[position.y][i+1].top === 1 || lineOwner[position.y][i+1].left === 1))
+					if(lineOwner[position.y][i].top !== teamName) {
+						lineOwner[position.y][i] = {...lineOwner[position.y][i], top: teamName};
+						if((i < mapSize.x && (lineOwner[position.y][i+1].top === teamName || lineOwner[position.y][i+1].left === teamName))
 							||
-							(position.y > 0 && lineOwner[position.y-1][i+1].left === 1))
+							(position.y > 0 && lineOwner[position.y-1][i+1].left === teamName))
 							shouldFillTiles.push(...this.fillTiles(i, position.y, 2));
 					}
 				}
 				else {
-					if(lineOwner[position.y][i-1].top !== 1) {
-						lineOwner[position.y][i-1] = {...lineOwner[position.y][i-1], top: 1};
-						if((i-2 >= 0 && lineOwner[position.y][i-2].top === 1) ||
-							 (i-1 >= 0 && lineOwner[position.y][i-1].left === 1) ||
-							 (position.y > 0 && i > 0 && lineOwner[position.y-1][i-1].left === 1))
+					if(lineOwner[position.y][i-1].top !== teamName) {
+						lineOwner[position.y][i-1] = {...lineOwner[position.y][i-1], top: teamName};
+						if((i-2 >= 0 && lineOwner[position.y][i-2].top === teamName) ||
+							 (i-1 >= 0 && lineOwner[position.y][i-1].left === teamName) ||
+							 (position.y > 0 && i > 0 && lineOwner[position.y-1][i-1].left === teamName))
 							 shouldFillTiles.push(...this.fillTiles(i, position.y, 4));
 					}
 				}
@@ -293,28 +291,28 @@ class Game extends React.Component {
 			const next = position.y < newPosition.y ? 1 : -1;
 			for(let i=position.y; i !== newPosition.y; i=i+next) {
 				if(next === 1) {
-					if(lineOwner[i][position.x].left !== 1) {
-						lineOwner[i][position.x] = {...lineOwner[i][position.x], left: 1};
+					if(lineOwner[i][position.x].left !== teamName) {
+						lineOwner[i][position.x] = {...lineOwner[i][position.x], left: teamName};
 						if(i < mapSize.y && 
-							(lineOwner[i+1][position.x].top === 1 || 
-							 lineOwner[i+1][position.x].left === 1 ||
-							 (position.x > 0 && lineOwner[i+1][position.x-1].top === 1)))
+							(lineOwner[i+1][position.x].top === teamName || 
+							 lineOwner[i+1][position.x].left === teamName ||
+							 (position.x > 0 && lineOwner[i+1][position.x-1].top === teamName)))
 							 shouldFillTiles.push(...this.fillTiles(position.x, i, 3));
 					}
 				}
 				else {
-					if(lineOwner[i-1][position.x].left !== 1) {
-						lineOwner[i-1][position.x] = {...lineOwner[i-1][position.x], left: 1};
-						if((i > 0 && lineOwner[i-1][position.x].top === 1) ||
-							 (i > 1 && lineOwner[i-2][position.x].left === 1) ||
-							 (i > 0 && position.x > 0 && lineOwner[i-1][position.x-1].top === 1))
+					if(lineOwner[i-1][position.x].left !== teamName) {
+						lineOwner[i-1][position.x] = {...lineOwner[i-1][position.x], left: teamName};
+						if((i > 0 && lineOwner[i-1][position.x].top === teamName) ||
+							 (i > 1 && lineOwner[i-2][position.x].left === teamName) ||
+							 (i > 0 && position.x > 0 && lineOwner[i-1][position.x-1].top === teamName))
 							 shouldFillTiles.push(...this.fillTiles(position.x, i, 1));
 					}
 				}
 			}
 		}
 		console.log("칠해야 하는 타일:", shouldFillTiles);
-		shouldFillTiles.forEach(tile => tilesOwner[tile.y][tile.x] = 1);
+		shouldFillTiles.forEach(tile => tilesOwner[tile.y][tile.x] = teamName);
 		this.setState({ position: newPosition, diceValues: [], tilesOwner, positionsMark, candidatePos: [], lineOwner });
 	}
 
@@ -327,17 +325,14 @@ class Game extends React.Component {
 			const lineOwnerRow = [];
 
 			for (let i=0; i<=x; i++) {
-				tilesOwnerRow.push(0);
+				tilesOwnerRow.push("no");
 				markRow.push(false);
-				lineOwnerRow.push({top: 0, left: 0});
+				lineOwnerRow.push({top: "no", left: "no"});
 			}
-			// tilesOwnerRow.pop();
-
 			tilesOwner.push(tilesOwnerRow);
 			positionsMark.push(markRow);
 			lineOwner.push(lineOwnerRow);
 		}
-		// tilesOwner.pop();
 		this.setState({ tilesOwner, positionsMark, lineOwner });
 	}
 
@@ -365,7 +360,7 @@ class Game extends React.Component {
 				<MapPosition
 					positionsMark={positionsMark}
 					handleClick={handleClick} />
-					<Marker owner={1} position={position} />
+					<Marker owner={teamName} position={position} />
 				</div>
 			</div>
 		)

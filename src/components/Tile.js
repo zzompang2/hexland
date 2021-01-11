@@ -1,7 +1,12 @@
 import React, { createRef } from "react";
 import "./Tile.css";
 
-const ownerColors = ["#e0e0e0", "red", "blue", "green"];
+const ownerColors = {
+	A: "red",
+	B: "blue",
+	no: "#e0e0e0",
+	mark: "green"
+};
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -42,7 +47,7 @@ class Tile extends React.Component {
 			ctx.stroke();
 
 			// 사각형
-			ctx.fillStyle = owner === 0 ? "white" : ownerColors[owner];
+			ctx.fillStyle = owner === "no" ? "white" : ownerColors[owner];
 			ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
 		}
 	}
