@@ -42,8 +42,8 @@ class Tile extends React.Component {
 			ctx.stroke();
 
 			// 사각형
-			// ctx.fillStyle = ownerColors[owner];
-			// ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
+			ctx.fillStyle = owner === 0 ? "white" : ownerColors[owner];
+			ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
 		}
 	}
 

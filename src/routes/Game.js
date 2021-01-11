@@ -255,12 +255,49 @@ class Game extends React.Component {
 				break;
 		}
 
-		console.log("결과:", closedShapeLines);
+		let minX = closedShapeLines[0];
+		for(let i=1; i<closedShapeLines.length; i++)
+			if(minX.x > closedShapeLines[i].x)
+				minX = closedShapeLines[i];
+
+		const shouldFillTiles = [];
+		const lineOwnerCopy2 = [];
+		lineOwner.map(row => {
+			const rowCopy = [];
+			row.map(owner => {rowCopy.push({...owner})});
+			lineOwnerCopy2.push(rowCopy);
+		});
+
+		shouldFillTiles.push( {x: minX.x, y: minX.y} );
+
+		for(let i=0; i < shouldFillTiles.length; i++) {
+			const tile = shouldFillTiles[i];
+			if(lineOwnerCopy2[tile.y][tile.x].top !== 1) {
+				lineOwnerCopy2[tile.y][tile.x].top = 1;
+				shouldFillTiles.push({x: tile.x, y: tile.y-1});
+			}
+			if(lineOwnerCopy2[tile.y][tile.x].left !== 1) {
+				lineOwnerCopy2[tile.y][tile.x].left = 1;
+				shouldFillTiles.push({x: tile.x-1, y: tile.y});
+			}
+			if(lineOwnerCopy2[tile.y][tile.x+1].left !== 1) {
+				lineOwnerCopy2[tile.y][tile.x+1].left = 1;
+				shouldFillTiles.push({x: tile.x+1, y: tile.y});
+			}
+			if(lineOwnerCopy2[tile.y+1][tile.x].top !== 1) {
+				lineOwnerCopy2[tile.y+1][tile.x].top = 1;
+				shouldFillTiles.push({x: tile.x, y: tile.y+1});
+			}
+		};
+
+		console.log("결과 타일:", shouldFillTiles);
+		return shouldFillTiles;
 	}
 
 	handleClick = (e, x, y) => {
-		const { mapSize, position, positionsOwner, positionsMark, candidatePos, lineOwner } = this.state;
+		const { mapSize, position, tilesOwner, positionsOwner, positionsMark, candidatePos, lineOwner } = this.state;
 		let newPosition;
+		const shouldFillTiles = [];
 		
 		console.log("타일 클릭:", x, y);
 
@@ -292,7 +329,7 @@ class Game extends React.Component {
 						if((i < mapSize.x && (lineOwner[position.y][i+1].top === 1 || lineOwner[position.y][i+1].left === 1))
 							||
 							(position.y > 0 && lineOwner[position.y-1][i+1].left === 1))
-							this.fillTiles(i, position.y, 2);
+							shouldFillTiles.push(...this.fillTiles(i, position.y, 2));
 					}
 				}
 				else {
@@ -301,19 +338,13 @@ class Game extends React.Component {
 						if((i-2 >= 0 && lineOwner[position.y][i-2].top === 1) ||
 							 (i-1 >= 0 && lineOwner[position.y][i-1].left === 1) ||
 							 (position.y > 0 && i > 0 && lineOwner[position.y-1][i-1].left === 1))
-							this.fillTiles(i, position.y, 4);
+							 shouldFillTiles.push(...this.fillTiles(i, position.y, 4));
 					}
 				}
 			}
 		}
 		else {
 			const next = position.y < newPosition.y ? 1 : -1;
-			// for(let i=position.y; i !== newPosition.y; i=i+next) {
-			// 	if(next === 1)
-			// 		lineOwner[i][position.x] = {...lineOwner[i][position.x], left: 1};
-			// 	else
-			// 		lineOwner[i-1][position.x] = {...lineOwner[i-1][position.x], left: 1};
-			// }
 			for(let i=position.y; i !== newPosition.y; i=i+next) {
 				if(next === 1) {
 					if(lineOwner[i][position.x].left !== 1) {
@@ -322,7 +353,7 @@ class Game extends React.Component {
 							(lineOwner[i+1][position.x].top === 1 || 
 							 lineOwner[i+1][position.x].left === 1 ||
 							 (position.x > 0 && lineOwner[i+1][position.x-1].top === 1)))
-							this.fillTiles(position.x, i, 3);
+							 shouldFillTiles.push(...this.fillTiles(position.x, i, 3));
 					}
 				}
 				else {
@@ -331,12 +362,16 @@ class Game extends React.Component {
 						if((i > 0 && lineOwner[i-1][position.x].top === 1) ||
 							 (i > 1 && lineOwner[i-2][position.x].left === 1) ||
 							 (i > 0 && position.x > 0 && lineOwner[i-1][position.x-1].top === 1))
-							this.fillTiles(position.x, i, 1);
+							 shouldFillTiles.push(...this.fillTiles(position.x, i, 1));
 					}
 				}
 			}
 		}
-		this.setState({ position: newPosition, diceValues: [], positionsOwner, positionsMark, candidatePos: [], lineOwner });
+		console.log("칠해야 하는 타일:", shouldFillTiles);
+		shouldFillTiles.map(tile => {
+			tilesOwner[tile.y][tile.x] = 1;
+		});
+		this.setState({ position: newPosition, diceValues: [], tilesOwner, positionsOwner, positionsMark, candidatePos: [], lineOwner });
 	}
 
 	componentDidMount() {
