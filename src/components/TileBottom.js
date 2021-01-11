@@ -5,14 +5,14 @@ const ownerColors = ["#e0e0e0", "red", "blue", "green"];
 const WIDTH = 20;
 const HEIGHT = 20;
 
-class Tile extends React.Component {
+class TileBottom extends React.Component {
 	state = {
 		canvasRef: createRef()
 	}
 
 	draw() {
 		let { canvasRef } = this.state;
-		const { owner, lineOwner: {top, left} } = this.props;
+		const { index, top } = this.props;
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
@@ -20,10 +20,6 @@ class Tile extends React.Component {
 
 			// 캔버스 지우기
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-			// 검정테두리
-			// ctx.fillStyle = "#909090";
-			// ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
 			// top line
 			ctx.beginPath();
@@ -33,17 +29,13 @@ class Tile extends React.Component {
 			ctx.strokeStyle = ownerColors[top];
 			ctx.stroke();
 
-			// left line
-			ctx.beginPath();
-			ctx.moveTo(0, 0);
-			ctx.lineTo(0, HEIGHT);
-			ctx.lineWidth = 4;
-			ctx.strokeStyle = ownerColors[left];
-			ctx.stroke();
-
 			// 사각형
-			// ctx.fillStyle = ownerColors[owner];
+			// ctx.fillStyle = ownerColors[0];
 			// ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
+
+			ctx.font = "10px gothic";
+			ctx.fillStyle = "black";
+			ctx.fillText(index, 10, 10);
 		}
 	}
 
@@ -52,20 +44,17 @@ class Tile extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps) {
-		return (this.props.owner !== nextProps.owner ||
-						this.props.lineOwner.top !== nextProps.lineOwner.top ||
-						this.props.lineOwner.left !== nextProps.lineOwner.left);
+		return (this.props.top !== nextProps.top);
 	}
 
 	render() {
 		const { canvasRef } = this.state;
-		console.log("Tile: render");
+		console.log("TileRight: render");
 
 		this.draw();
 
 		return (
 			<canvas
-			className="tile"
 			ref={canvasRef}
 			width={WIDTH} 
 			height={HEIGHT} />
@@ -73,4 +62,4 @@ class Tile extends React.Component {
 	}
 }
 
-export default Tile;
+export default TileBottom;

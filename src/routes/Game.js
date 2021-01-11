@@ -15,7 +15,8 @@ class Game extends React.Component {
 		tilesOwner: [],
 		positionsOwner: [],
 		positionsMark: [],
-		candidatePos: []
+		candidatePos: [],
+		lineOwner: []
 	}
 
 	throwDices = () => {
@@ -25,6 +26,14 @@ class Game extends React.Component {
 
 		if(candidatePos.length !== 0) {
 			console.log("이동할 좌표 선택해 주세요.");
+			
+			// 주사위 초기화 (for debug)
+			candidatePos.map(pos => {  
+				positionsMark[pos.y][pos.x] = false;
+			});
+			this.setState({ diceValues: [], positionsMark, candidatePos: [] });
+			// =====================
+
 			return;
 		}
 
@@ -98,68 +107,167 @@ class Game extends React.Component {
 		this.setState({ diceValues: [one, two], positionsMark, candidatePos });
 	}
 
-	fillTiles(startX, startY) {
-		console.log("타일 채우기:", startX, startY);
-		const { mapSize, positionsOwner } = this.state;
-		const positionsOwnerCopy = [];
-		const closedShapePos = [];
+	/**
+	 * 
+	 * @param {number} startX 
+	 * @param {number} startY 
+	 * @param {number} direction 1 ~ 4. 상우하좌
+	 */
+	fillTiles(startX, startY, direction) {
+		console.log("타일 채우기:", startX, startY, direction);
+		const { mapSize, lineOwner } = this.state;
+		const lineOwnerCopy = [];
+		const closedShapeLines = [];
 		let x = startX;
 		let y = startY;
+		let dir = direction;
 
-		positionsOwner.map((row, i) => {
-			positionsOwnerCopy[i] = [...row];
+		lineOwner.map(row => {
+			const rowCopy = [];
+			row.map(owner => {rowCopy.push({...owner})});
+			lineOwnerCopy.push(rowCopy);
 		});
 
-		closedShapePos.push({x: startX, y: startY});
-		positionsOwnerCopy[y][x] = 0;
+		closedShapeLines.push({x: startX, y: startY, dir: dir});
 
-		while(true) {
-			if(y-1 >= 0 && positionsOwnerCopy[y-1][x] === 1) {
-				console.log("case 1");
-				y = y-1;
-				closedShapePos.push({x, y});
+		for(let i = 0; i<100; i++) {
+			if(dir === 1) {
+				if(lineOwnerCopy[y-2][x].left === 1) {
+					lineOwnerCopy[y-2][x].left = 0;
+					y = y-1;
+					dir = 1;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y-1][x].top === 1) {
+					lineOwnerCopy[y-1][x].top = 0;
+					y = y-1;
+					dir = 2;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y-1][x-1].top === 1) {
+					lineOwnerCopy[y-1][x-1].top = 0;
+					y = y-1;
+					dir = 4;
+					closedShapeLines.push({x, y, dir});
+				}
+				else {
+					console.log("back");
+					closedShapeLines.pop();
+					// 순환이 없는 경우
+					if(closedShapeLines.length === 0) break;
+					const last = closedShapeLines[closedShapeLines.length-1];
+					x = last.x;
+					y = last.y;
+					dir = last.dir;
+				}
 			}
-			else if(x+1 <= mapSize.x && positionsOwnerCopy[y][x+1] === 1) {
-				console.log("case 2");
-				x = x+1;
-				closedShapePos.push({x, y});
+			else if(dir === 2) {
+				if(lineOwnerCopy[y-1][x+1].left === 1) {
+					lineOwnerCopy[y-1][x+1].left = 0;
+					x = x+1;
+					dir = 1;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y][x+1].top === 1) {
+					lineOwnerCopy[y][x+1].top = 0;
+					x = x+1;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y][x+1].left === 1) {
+					lineOwnerCopy[y][x+1].left = 0;
+					x = x+1;
+					dir = 3;
+					closedShapeLines.push({x, y, dir});
+				}
+				else {
+					closedShapeLines.pop();
+					// 순환이 없는 경우
+					if(closedShapeLines.length === 0) break;
+					const last = closedShapeLines[closedShapeLines.length-1];
+					x = last.x;
+					y = last.y;
+					dir = last.dir;
+				}
 			}
-			else if(y+1 <= mapSize.y && positionsOwnerCopy[y+1][x] === 1) {
-				console.log("case 3");
-				y = y+1;
-				closedShapePos.push({x, y});
+			else if(dir === 3) {
+				if(lineOwnerCopy[y+1][x].top === 1) {
+					lineOwnerCopy[y+1][x].top = 0;
+					y = y+1;
+					dir = 2;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y+1][x].left === 1) {
+					lineOwnerCopy[y+1][x].left = 0;
+					y = y+1;
+					dir = 3;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y+1][x-1].top === 1) {
+					lineOwnerCopy[y+1][x-1].top = 0;
+					y = y+1;
+					dir = 4;
+					closedShapeLines.push({x, y, dir});
+				}
+				else {
+					closedShapeLines.pop();
+					// 순환이 없는 경우
+					if(closedShapeLines.length === 0) break;
+					const last = closedShapeLines[closedShapeLines.length-1];
+					x = last.x;
+					y = last.y;
+					dir = last.dir;
+				}
 			}
-			else if(x-1 >= 0 && positionsOwnerCopy[y][x-1] === 1) {
-				console.log("case 4");
-				x = x-1;
-				closedShapePos.push({x, y});
-			}
-			else {
-				console.log("case 5");
+			else if(dir === 4) {
+				if(lineOwnerCopy[y-1][x-1].left === 1) {
+					lineOwnerCopy[y-1][x-1].left = 0;
+					x = x-1;
+					dir = 1;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y][x-1].left === 1) {
+					lineOwnerCopy[y][x-1].left = 0;
+					x = x-1;
+					dir = 3;
+					closedShapeLines.push({x, y, dir});
+				}
+				else if(lineOwnerCopy[y][x-2].top === 1) {
+					lineOwnerCopy[y][x-2].top = 0;
+					x = x-1;
+					dir = 4;
+					closedShapeLines.push({x, y, dir});
+				}
+				else {
+					closedShapeLines.pop();
 
-				if((x === startX && Math.abs(y-startY) === 1) ||
-					 (y === startY && Math.abs(x-startX) === 1))
-					break;
+					// 순환이 없는 경우
+					if(closedShapeLines.length === 0) break;
 
-				closedShapePos.pop();
-				const last = closedShapePos[closedShapePos.length-1];
-				x = last.x;
-				y = last.y;
+					const last = closedShapeLines[closedShapeLines.length-1];
+					x = last.x;
+					y = last.y;
+					dir = last.dir;
+				}
 			}
-			positionsOwnerCopy[y][x] = 0;
+
+			// 시작했던 line 으로 돌아온 경우, 순환이 있다는 뜻
+			if(closedShapeLines.length !== 1 && x === startX && y === startY && dir === direction)
+				break;
 		}
-		console.log("결과:", closedShapePos);
+
+		console.log("결과:", closedShapeLines);
 	}
 
 	handleClick = (e, x, y) => {
-		const { position, positionsOwner, positionsMark, candidatePos } = this.state;
+		const { mapSize, position, positionsOwner, positionsMark, candidatePos, lineOwner } = this.state;
+		let newPosition;
+		
 		console.log("타일 클릭:", x, y);
 
 		if(candidatePos.length === 0)
 			return;
 
-		let newPosition;
-	
+		// 후보들 중에 클릭한 좌표가 있는지 검사
 		for(let i=0; i<candidatePos.length; i++) {
 			const pos = candidatePos[i];
 			if(pos.x === x && pos.y === y) {
@@ -169,75 +277,96 @@ class Game extends React.Component {
 		}
 		if(newPosition === undefined)
 			return;
-		
-		console.log("이동한 좌표:", newPosition);
+
+		// 후보 좌표 마크 제거
 		candidatePos.map(pos => {  
 			positionsMark[pos.y][pos.x] = false;
-		 })
+		});
 
 		if(position.x !== newPosition.x) {
 			const next = position.x < newPosition.x ? 1 : -1;
-			for(let i=position.x; ; i=i+next) {
-				if(positionsOwner[position.y][i] !== 1) {
-					positionsOwner[position.y][i] = 1;
-
-					if(positionsOwner[position.y][i+next] === 1 ||
-						 (positionsOwner[position.y+1] !== undefined &&
-							positionsOwner[position.y+1][i] === 1) ||
-						 (position.y-1 >= 0 && 
-							positionsOwner[position.y-1][i] === 1))
-						this.fillTiles(i, position.y);
+			for(let i=position.x; i !== newPosition.x; i=i+next) {
+				if(next === 1) {
+					if(lineOwner[position.y][i].top !== 1) {
+						lineOwner[position.y][i] = {...lineOwner[position.y][i], top: 1};
+						if((i < mapSize.x && (lineOwner[position.y][i+1].top === 1 || lineOwner[position.y][i+1].left === 1))
+							||
+							(position.y > 0 && lineOwner[position.y-1][i+1].left === 1))
+							this.fillTiles(i, position.y, 2);
+					}
 				}
-
-				if(i === newPosition.x)
-					break;
+				else {
+					if(lineOwner[position.y][i-1].top !== 1) {
+						lineOwner[position.y][i-1] = {...lineOwner[position.y][i-1], top: 1};
+						if((i-2 >= 0 && lineOwner[position.y][i-2].top === 1) ||
+							 (i-1 >= 0 && lineOwner[position.y][i-1].left === 1) ||
+							 (position.y > 0 && i > 0 && lineOwner[position.y-1][i-1].left === 1))
+							this.fillTiles(i, position.y, 4);
+					}
+				}
 			}
 		}
 		else {
 			const next = position.y < newPosition.y ? 1 : -1;
-			for(let i=position.y; ; i=i+next) {
-				if(positionsOwner[i][position.x] !== 1) {
-					positionsOwner[i][position.x] = 1;
-
-					if((positionsOwner[i+next] !== undefined &&
-						  positionsOwner[i+next][position.x] === 1) ||
-						 positionsOwner[i][position.x+1] === 1 ||
-						 positionsOwner[i][position.x-1] === 1)
-						this.fillTiles(position.x, i);
+			// for(let i=position.y; i !== newPosition.y; i=i+next) {
+			// 	if(next === 1)
+			// 		lineOwner[i][position.x] = {...lineOwner[i][position.x], left: 1};
+			// 	else
+			// 		lineOwner[i-1][position.x] = {...lineOwner[i-1][position.x], left: 1};
+			// }
+			for(let i=position.y; i !== newPosition.y; i=i+next) {
+				if(next === 1) {
+					if(lineOwner[i][position.x].left !== 1) {
+						lineOwner[i][position.x] = {...lineOwner[i][position.x], left: 1};
+						if(i < mapSize.y && 
+							(lineOwner[i+1][position.x].top === 1 || 
+							 lineOwner[i+1][position.x].left === 1 ||
+							 (position.x > 0 && lineOwner[i+1][position.x-1].top === 1)))
+							this.fillTiles(position.x, i, 3);
+					}
 				}
-
-				if(i === newPosition.y)
-					break;
+				else {
+					if(lineOwner[i-1][position.x].left !== 1) {
+						lineOwner[i-1][position.x] = {...lineOwner[i-1][position.x], left: 1};
+						if((i > 0 && lineOwner[i-1][position.x].top === 1) ||
+							 (i > 1 && lineOwner[i-2][position.x].left === 1) ||
+							 (i > 0 && position.x > 0 && lineOwner[i-1][position.x-1].top === 1))
+							this.fillTiles(position.x, i, 1);
+					}
+				}
 			}
 		}
-		this.setState({ position: newPosition, diceValues: [], positionsOwner, positionsMark, candidatePos: [] });
+		this.setState({ position: newPosition, diceValues: [], positionsOwner, positionsMark, candidatePos: [], lineOwner });
 	}
 
 	componentDidMount() {
-		const { tilesOwner, positionsMark, positionsOwner, mapSize: {x, y} } = this.state;
+		const { tilesOwner, positionsMark, positionsOwner, mapSize: {x, y}, lineOwner } = this.state;
 
-		for (let j=0; j<y+1; j++) {
+		for (let j=0; j<=y; j++) {
 			const tilesOwnerRow = [];
 			const markRow = [];
 			const positionsOwnerRow = [];
+			const lineOwnerRow = [];
 
-			for (let i=0; i<x+1; i++) {
+			for (let i=0; i<=x; i++) {
 				tilesOwnerRow.push(0);
 				markRow.push(false);
 				positionsOwnerRow.push(0);
+				lineOwnerRow.push({top: 0, left: 0});
 			}
-			tilesOwnerRow.pop();
+			// tilesOwnerRow.pop();
 
 			tilesOwner.push(tilesOwnerRow);
 			positionsOwner.push(positionsOwnerRow);
 			positionsMark.push(markRow);
+			lineOwner.push(lineOwnerRow);
 		}
-		tilesOwner.pop();
-		this.setState({ tilesOwner, positionsMark, positionsOwner });
+		// tilesOwner.pop();
+		this.setState({ tilesOwner, positionsMark, positionsOwner, lineOwner });
 	}
 
 	render() {
-		const { diceValues, position, tilesOwner, positionsMark, positionsOwner } = this.state;
+		const { mapSize, diceValues, position, tilesOwner, positionsMark, positionsOwner, lineOwner } = this.state;
 		const {
 			throwDices,
 			handleClick
@@ -259,7 +388,7 @@ class Game extends React.Component {
 					주사위 던지기
 				</button>
 				<div className="mapContainer">
-				<MapTile tilesOwner={tilesOwner} />
+				<MapTile mapSize={mapSize} tilesOwner={tilesOwner} lineOwner={lineOwner} />
 				<MapPosition
 					positionsOwner={positionsOwner}
 					positionsMark={positionsMark}
