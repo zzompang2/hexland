@@ -1,11 +1,16 @@
 import React, { createRef } from "react";
 import "./Tile.css";
 
-const ownerColors = {
+const lineColors = {
 	A: "red",
 	B: "blue",
 	no: "#e0e0e0",
-	mark: "green"
+	block: "orange"
+};
+const fillColors = {
+	A: "pink",
+	B: "skyblue",
+	no: "white",
 };
 const WIDTH = 20;
 const HEIGHT = 20;
@@ -26,16 +31,12 @@ class Tile extends React.Component {
 			// 캔버스 지우기
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-			// 검정테두리
-			// ctx.fillStyle = "#909090";
-			// ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
 			// top line
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
 			ctx.lineTo(WIDTH, 0);
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = ownerColors[top];
+			ctx.strokeStyle = lineColors[top];
 			ctx.stroke();
 
 			// left line
@@ -43,11 +44,11 @@ class Tile extends React.Component {
 			ctx.moveTo(0, 0);
 			ctx.lineTo(0, HEIGHT);
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = ownerColors[left];
+			ctx.strokeStyle = lineColors[left];
 			ctx.stroke();
 
 			// 사각형
-			ctx.fillStyle = owner === "no" ? "white" : ownerColors[owner];
+			ctx.fillStyle = fillColors[owner];
 			ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
 		}
 	}

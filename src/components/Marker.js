@@ -5,7 +5,8 @@ const ownerColors = {
 	A: "red",
 	B: "blue",
 	no: "#e0e0e0",
-	mark: "green"
+	mark: "green",
+	block: "orange"
 };
 const WIDTH = 20;
 const HEIGHT = 20;
