@@ -14,6 +14,7 @@ const teamName = ["RED", "BLUE"];
 class Game extends React.Component {
 	state = {
 		mapSize: mapSize,
+		isGameReady: false,
 		nowTurn: firstTeamIdx,
 		markerPositions: [],
 		diceValues: [],
@@ -38,8 +39,8 @@ class Game extends React.Component {
 			console.log("이동할 좌표 선택해 주세요.");
 			
 			// === 주사위 초기화 (for debug) ===
-			candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
-			this.setState({ diceValues: [], positionsMark, candidatePos: [] });
+			// candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
+			// this.setState({ diceValues: [], positionsMark, candidatePos: [] });
 			// =============================
 
 			return;
@@ -275,23 +276,33 @@ class Game extends React.Component {
 	}
 
 	handleClick = (x, y) => {
-		const { candidatePos } = this.state;
-		let newPosition;	
+		let { isGameReady } = this.state;
+		const { markerPositions, candidatePos } = this.state;
+		let newPosition;
 		
 		console.log("타일 클릭:", x, y);
 
-		// 후보들 중에 클릭한 좌표가 있는지 검사
-		for(let i=0; i<candidatePos.length; i++) {
-			const pos = candidatePos[i];
-			if(pos.x === x && pos.y === y) {
-				newPosition = pos;
-				break;
-			}
+		if(!isGameReady) {
+			markerPositions.push({x, y});
+			if(markerPositions.length === teamNum)
+				isGameReady = true;
+			this.setState({ isGameReady, markerPositions });
 		}
-		if(newPosition === undefined)
-			return;
 
-		this.markMoveTo(x, y);
+		else {
+			// 후보들 중에 클릭한 좌표가 있는지 검사
+			for(let i=0; i<candidatePos.length; i++) {
+				const pos = candidatePos[i];
+				if(pos.x === x && pos.y === y) {
+					newPosition = pos;
+					break;
+				}
+			}
+			if(newPosition === undefined)
+				return;
+
+			this.markMoveTo(x, y);
+		}
 	}
 
 	markMoveTo = (newX, newY) => {
@@ -375,9 +386,12 @@ class Game extends React.Component {
 
 	handleKeyDown = (e) => {
 		console.log("Key press", e.keyCode);
-		const { nowTurn, markerPositions, candidatePos } = this.state;
+		const { isGameReady, nowTurn, markerPositions, candidatePos } = this.state;
 		const position = markerPositions[nowTurn - firstTeamIdx];
 		const { throwDices, markMoveTo } = this;
+
+		if(!isGameReady)
+			return;
 
 		if(e.keyCode === 32)
 			throwDices();
@@ -427,10 +441,10 @@ class Game extends React.Component {
 	componentDidMount() {
 		const { markerPositions, tilesOwner, positionsMark, mapSize: {x, y}, lineOwner } = this.state;
 
-		for(let i=0; i<teamNum; i++) {
-			const startPosition = {x: Math.floor((mapSize.x+1)/2), y: Math.floor((mapSize.y+1)/2)};
-			markerPositions.push(startPosition);
-		}
+		// for(let i=0; i<teamNum; i++) {
+		// 	const startPosition = {x: Math.floor((mapSize.x+1)/2), y: Math.floor((mapSize.y+1)/2)};
+		// 	markerPositions.push(startPosition);
+		// }
 
 		for (let j=0; j<=y; j++) {
 			const tilesOwnerRow = [];
@@ -451,7 +465,7 @@ class Game extends React.Component {
 	}
 
 	render() {
-		const { mapSize, diceValues, markerPositions, tilesOwner, positionsMark, lineOwner, nowTurn } = this.state;
+		const { isGameReady, mapSize, diceValues, markerPositions, tilesOwner, positionsMark, lineOwner, nowTurn } = this.state;
 		const {
 			gameFocus,
 			throwDices,
@@ -463,12 +477,18 @@ class Game extends React.Component {
 			<div className="container" onClick={gameFocus}>
 				<input ref={ref => (this.gameFocusRef = ref)} onKeyDown={handleKeyDown} />
 				<div>Game Main : {teamName[nowTurn-firstTeamIdx]}</div>
-				{diceValues.length !== 0 ?
-				<div>one:{diceValues[0]} two:{diceValues[1]}</div>
-				:
-				<div>주사위를 던져주세요</div>
+				{!isGameReady ?
+					<div>시작할 위치를 클릭해 주세요</div>
+					:
+					<div>
+						{diceValues.length !== 0 ?
+							`one:${diceValues[0]} two:${diceValues[1]}`
+							:
+							"주사위를 던져주세요"
+						}
+					</div>
 				}
-				<button onClick={throwDices}>
+				<button disabled={!isGameReady} onClick={throwDices}>
 					주사위 던지기
 				</button>
 				<div className="mapContainer">
