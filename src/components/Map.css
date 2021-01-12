@@ -1,20 +1,36 @@
 .pos_column,
 .tiles_column {
 	position: absolute;
+	top: 50%;
+	left: 50%;
+	/* 기준점을 x축 중앙으로 옮기기 */
+	transform: translate(-50%, -50%);
+	/* div들 사이에 공백 없애기 위해. */
 	font-size: 0;
-}
-
-.pos_column {
-	left: 0;
-	top: 0;
-}
-
-.tiles_column {
-	left: 10;
-	top: 10;
 }
 
 .pos_row,
 .tiles_row {
 	display: flex;
+}
+
+.pos_row canvas {
+	/* Position 가 약간 안 맞는 걸 맞추기 위해 */
+	transform: translate(-1px);
+}
+
+.container__mapbg {
+	min-width: 450px;
+	min-height: 450px;
+	width: 30rem;
+	height: 30rem;
+	background-color: white;
+	border: .3rem solid black;
+	border-radius: 2rem;
+}
+
+.container__marker {
+	position: absolute;
+	/* Marker 가 약간 안 맞는 걸 맞추기 위해 */
+	transform: translate(-1px);
 }

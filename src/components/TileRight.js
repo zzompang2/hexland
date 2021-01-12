@@ -28,10 +28,6 @@ class TileRight extends React.Component {
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = LineColors[left];
 			ctx.stroke();
-
-			ctx.font = "10px gothic";
-			ctx.fillStyle = "black";
-			ctx.fillText(index, 10, 10);
 		}
 	}
 
@@ -52,7 +48,7 @@ class TileRight extends React.Component {
 		return (
 			<canvas
 			ref={canvasRef}
-			width={WIDTH} 
+			width={4} 
 			height={HEIGHT} />
 		)
 	}

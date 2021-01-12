@@ -2,7 +2,6 @@ import React, { createRef } from "react";
 import { LineColors, FillColors } from '../values/Colors';
 import "./Tile.css";
 
-
 const WIDTH = 20;
 const HEIGHT = 20;
 

@@ -28,10 +28,6 @@ class TileBottom extends React.Component {
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = LineColors[top];
 			ctx.stroke();
-
-			ctx.font = "10px gothic";
-			ctx.fillStyle = "black";
-			ctx.fillText(index, 10, 10);
 		}
 	}
 
@@ -53,7 +49,7 @@ class TileBottom extends React.Component {
 			<canvas
 			ref={canvasRef}
 			width={WIDTH} 
-			height={HEIGHT} />
+			height={4} />
 		)
 	}
 }

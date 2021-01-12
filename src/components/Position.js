@@ -1,13 +1,7 @@
 import React, { createRef } from "react";
 import "./Position.css";
 
-const ownerColors = {
-	A: "red",
-	B: "blue",
-	no: "#e0e0e0",
-	mark: "green",
-	block: "orange"
-};
+const markColor = "green";
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -28,13 +22,17 @@ class Position extends React.Component {
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
 			if(isMark) {
-				// 테두리 원
-				let circle = new Path2D();
-				circle.arc(WIDTH/2, HEIGHT/2, 6, 0, 2 * Math.PI);
-				ctx.fillStyle = ownerColors["mark"];
-				ctx.fill(circle);
+				// 사각형
+				ctx.fillStyle = markColor;
+				ctx.fillRect(WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+				ctx.fillStyle = "white";
+				ctx.fillRect(WIDTH/4+2, HEIGHT/4+2, WIDTH/2-4, HEIGHT/2-4);
 			}
 		}
+	}
+
+	componentDidMount() {
+		this.draw();
 	}
 
 	shouldComponentUpdate(nextProps) {

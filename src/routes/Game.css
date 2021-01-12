@@ -1,3 +1,132 @@
-.mapContainer {
-	position: absolute;
+.container__game {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	height: 100vh;
+}
+
+.container__column {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 100%;
+	padding: 0 2rem;
+}
+
+.container__top {
+	display: flex;
+	min-height: 96px;
+	align-items:center;
+	/* background-color: pink; */
+}
+
+.container__top div {
+	color: black;
+	font-size: 1.4rem;
+}
+
+.container__dice {
+	display: flex;
+	justify-content: space-around;
+}
+
+.gameFocusInput {
+	opacity: 0;
+}
+
+.container__map {
+	/* absolute 인 자식컴포넌트들의 기준이 되기 위해. */
+	position: relative;
+}
+
+.container__button {
+	display: flex;
+	padding: 3rem 0;
+}
+
+.container__spacebar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.button__spacebar {
+	width: 15rem;
+	height: 3rem;
+	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
+	border: .1rem solid #ffffff55;
+	border-radius: 1.5rem;
+	color: white;
+}
+
+.container__arrow {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* 스페이스바 버튼이랑 간격 */
+	padding: 0 0 0 3rem;
+}
+
+.container__arrowKey {
+	display: flex;
+	flex-direction: column;
+	width: 9.4rem;
+	height: 3rem;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.container__arrow,
+.container__spacebar p {
+	color: white;
+}
+
+.container__arrowKey div {
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.button__arrow {
+	width: 3rem;
+	height: 1.4rem;
+	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
+	border: .1rem solid #ffffff55;
+	border-radius: 1.5rem;
+	color: white;
+}
+
+.score__bg,
+.score__highlight {
+	display: flex;
+	width: 7rem;
+	height: 7rem;
+	align-items: center;
+	justify-content: center;
+	transform: rotate(45deg);
+	border-radius: 5rem 5rem 0 5rem;
+}
+
+.score__highlight {
+	width: 10rem;
+	height: 10rem;
+}
+
+.score__bg {
+	background-color: white;
+	color: black;
+	font-size: 3rem;
+}
+
+.score__highlight {
+	background-color: var(--green);
+	color: white;
+	font-size: 5rem;
+}
+
+.score__bg div,
+.score__highlight div {
+	transform: rotate(-45deg);
+	/* font-size: 4rem; */
 }

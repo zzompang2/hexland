@@ -1,18 +1,17 @@
 import React from "react";
 import Position from "./Position";
+import Marker from "../components/Marker";
 import "./Map.css";
 
 class MapPosition extends React.Component {
-	state = {
-		positionsMark: this.props.positionsMark
-	}
-
 	render() {
-		const { positionsMark, handleClick } = this.props;
-		// console.log("MapPosition: render");
+		const { positionsMark, handleClick, markerPositions, firstTeamIdx, nowTurn } = this.props;
 
 		return (
 			<div className="pos_column">
+				{markerPositions.map((position, idx) =>
+					<Marker key={idx} owner={firstTeamIdx + idx} position={position} nowTurn={nowTurn} />
+				)}
 				{positionsMark.map((row, j) => (
 					<div 
 					key={j}

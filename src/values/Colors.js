@@ -1,21 +1,15 @@
-export const COLORS = {
-  A: "red",
-	B: "blue",
-	no: "#e0e0e0",
-	mark: "green",
-	block: "orange"
-}
-
 export const LineColors = [
-  "#e0e0e0",
-	"orange",
-	"red",
-	"blue"
+  "#ffffff00",
+	"#22bc7d",			// block 된 Line
+	"#0067bb",			// cat team blue
+	"#ff4334",			// dog team red
+	"#e0e0e0"				// for map line
 ]
 
 export const FillColors = [
-  "white",
+  "#ffffff00",
 	"white",
-	"pink",
-	"skyblue"
+	"#23a0e5",
+	"#ff7976",
+	"white"				// for map line
 ]

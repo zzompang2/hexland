@@ -13,13 +13,8 @@ class MapTile extends React.Component {
 		const { mapSize, tilesOwner, lineOwner } = this.props;
 		console.log("Map: render");
 
-		const styles = {
-			top: HEIGHT/2,
-			left: WIDTH/2
-		}
-
 		return (
-			<div className="tiles_column" style={styles}>
+			<div className="tiles_column">
 				{tilesOwner.map((ownerRow, j) => (
 					<div 
 					key={j}
