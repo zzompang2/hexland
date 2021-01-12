@@ -1,18 +1,18 @@
 import React, { createRef } from "react";
-import "./Position.css";
+import { LineColors } from '../values/Colors';
+import "./Tile.css";
 
-const markColor = "green";
 const WIDTH = 20;
 const HEIGHT = 20;
 
-class Position extends React.Component {
+class TileRight extends React.Component {
 	state = {
 		canvasRef: createRef()
 	}
 
-	// mark or clean
-	draw(isMark) {
+	draw() {
 		let { canvasRef } = this.state;
+		const { index, left } = this.props;
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
@@ -21,13 +21,13 @@ class Position extends React.Component {
 			// 캔버스 지우기
 			ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-			if(isMark) {
-				// 사각형
-				ctx.fillStyle = markColor;
-				ctx.fillRect(WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-				ctx.fillStyle = "white";
-				ctx.fillRect(WIDTH/4+2, HEIGHT/4+2, WIDTH/2-4, HEIGHT/2-4);
-			}
+			// left line
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			ctx.lineTo(0, HEIGHT);
+			ctx.lineWidth = 4;
+			ctx.strokeStyle = LineColors[left];
+			ctx.stroke();
 		}
 	}
 
@@ -36,23 +36,22 @@ class Position extends React.Component {
 	}
 
 	shouldComponentUpdate(nextProps) {
-		return (this.props.isMark !== nextProps.isMark);
+		return (this.props.left !== nextProps.left);
 	}
 
 	render() {
 		const { canvasRef } = this.state;
-		const { isMark } = this.props;
+		console.log("TileRight: render");
 
-		this.draw(isMark);
+		this.draw();
 
 		return (
 			<canvas
-			className="pos"
 			ref={canvasRef}
-			width={WIDTH} 
+			width={4} 
 			height={HEIGHT} />
 		)
 	}
 }
 
-export default Position;
+export default TileRight;

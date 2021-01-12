@@ -1,0 +1,16 @@
+.navigation {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: var(--green);
+	width: 9rem;
+	height: 3rem;
+	border-radius: 0 0 4rem 0;
+	padding: 1.5rem 0 0 2rem;
+}
+
+.navigation a {
+	color: white;
+	text-decoration: none;
+	font-size: 1.3rem;
+}

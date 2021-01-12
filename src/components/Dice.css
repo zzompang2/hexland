@@ -1,0 +1,32 @@
+.dice {
+	min-width: 110px;
+	min-height: 96px;
+	width: 10rem;
+	position: relative;
+	left: 0;
+	top: 0;
+	/* background-color: blue; */
+}
+
+.dice canvas {
+	/* canvas 의 기준점이 중앙으로 오도록 한다 */
+	/* absolute 는 static 이 아닌 부모를 기준으로 한다 */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	/* canvas 의 기준점을 중앙으로 옮기기 */
+	transform: translate(-50%, -50%);
+}
+
+.dice p {
+	/* 중아으로 오도록 */
+	position: absolute;
+	top: 58%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	/* default margin 지우기 */
+	margin: 0;
+
+	font-size: 2rem;
+	text-align: center;
+}
