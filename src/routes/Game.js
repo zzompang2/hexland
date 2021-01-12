@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import MapTile from "../components/MapTile";
 import MapPosition from "../components/MapPosition";
 import Marker from "../components/Marker";
@@ -9,6 +9,7 @@ const noOwner = 0;
 const block = 1;
 const firstTeamIdx = 2;
 const teamNum = 2;
+const teamName = ["RED", "BLUE"];
 
 class Game extends React.Component {
 	state = {
@@ -19,8 +20,9 @@ class Game extends React.Component {
 		tilesOwner: [],
 		positionsMark: [],
 		candidatePos: [],
-		lineOwner: [],
+		lineOwner: []
 	}
+	gameFocusRef = null;
 
 	/**
 	 * 주사위를 던져 두 개의 랜덤한 숫자를 출력하고 이동할 수 있는 위치를 표시한다.
@@ -272,12 +274,9 @@ class Game extends React.Component {
 		return shouldFillTiles;
 	}
 
-	handleClick = (e, x, y) => {
-		const { mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner } = this.state;
-		const markerPosition = markerPositions[nowTurn - firstTeamIdx];
-		let newPosition;
-		const shouldFillTiles = [];
-		const lineOwnerCopy = [];
+	handleClick = (x, y) => {
+		const { candidatePos } = this.state;
+		let newPosition;	
 		
 		console.log("타일 클릭:", x, y);
 
@@ -292,6 +291,15 @@ class Game extends React.Component {
 		if(newPosition === undefined)
 			return;
 
+		this.markMoveTo(x, y);
+	}
+
+	markMoveTo = (newX, newY) => {
+		const { mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner } = this.state;
+		const markerPosition = markerPositions[nowTurn - firstTeamIdx];
+		const shouldFillTiles = [];
+		const lineOwnerCopy = [];
+
 		// 후보 좌표 마크 제거
 		candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
 
@@ -303,9 +311,9 @@ class Game extends React.Component {
 		});
 
 		// x 축 방향으로 선을 그을 때
-		if(markerPosition.x !== newPosition.x) {
-			const next = markerPosition.x < newPosition.x ? 1 : -1;
-			for(let i=markerPosition.x; i !== newPosition.x; i=i+next) {
+		if(markerPosition.x !== newX) {
+			const next = markerPosition.x < newX ? 1 : -1;
+			for(let i=markerPosition.x; i !== newX; i=i+next) {
 				if(next === 1) {
 					if(lineOwnerCopy[markerPosition.y][i].top !== nowTurn &&
 						 lineOwnerCopy[markerPosition.y][i].top !== block) {
@@ -330,8 +338,8 @@ class Game extends React.Component {
 		}
 		// y 축 방향으로 선을 그을 때
 		else {
-			const next = markerPosition.y < newPosition.y ? 1 : -1;
-			for(let i=markerPosition.y; i !== newPosition.y; i=i+next) {
+			const next = markerPosition.y < newY ? 1 : -1;
+			for(let i=markerPosition.y; i !== newY; i=i+next) {
 				if(next === 1) {
 					if(lineOwnerCopy[i][markerPosition.x].left !== nowTurn &&
 						 lineOwnerCopy[i][markerPosition.x].left !== block) {
@@ -356,13 +364,64 @@ class Game extends React.Component {
 			}
 		}
 		console.log("칠해야 하는 타일:", shouldFillTiles);
-		markerPositions[nowTurn - firstTeamIdx] = newPosition;
+		markerPositions[nowTurn - firstTeamIdx] = {x: newX, y: newY};
 		shouldFillTiles.forEach(tile => tilesOwner[tile.y][tile.x] = nowTurn);
 
 		// 다음 턴으로 이동
 		const nextTurn = nowTurn + 1 < firstTeamIdx + teamNum ? nowTurn + 1 : firstTeamIdx;
 
 		this.setState({ nowTurn: nextTurn, markerPositions: markerPositions, diceValues: [], tilesOwner, positionsMark, candidatePos: [], lineOwner: lineOwnerCopy });
+	}
+
+	handleKeyDown = (e) => {
+		console.log("Key press", e.keyCode);
+		const { nowTurn, markerPositions, candidatePos } = this.state;
+		const position = markerPositions[nowTurn - firstTeamIdx];
+		const { throwDices, markMoveTo } = this;
+
+		if(e.keyCode === 32)
+			throwDices();
+
+		if(candidatePos.length === 0)
+			return;
+
+		switch(e.keyCode) {
+			case 37:	// 왼쪽
+				candidatePos.forEach(pos => {
+					if(pos.x < position.x && pos.y === position.y)
+						markMoveTo(pos.x, pos.y);
+				});
+				break;
+
+			case 38:	// 위
+				candidatePos.forEach(pos => {
+					if(pos.x === position.x && pos.y < position.y)
+						markMoveTo(pos.x, pos.y);
+				});
+				break;
+
+			case 39:	// 오른쪽
+				candidatePos.forEach(pos => {
+					if(pos.x > position.x && pos.y === position.y)
+						markMoveTo(pos.x, pos.y);
+				});
+				break;
+
+			case 40:	// 아래
+				candidatePos.forEach(pos => {
+					if(pos.x === position.x && pos.y > position.y)
+						markMoveTo(pos.x, pos.y);
+				});
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	gameFocus = () => {
+		console.log("game focus");
+		this.gameFocusRef.focus();
 	}
 
 	componentDidMount() {
@@ -387,26 +446,29 @@ class Game extends React.Component {
 			positionsMark.push(markRow);
 			lineOwner.push(lineOwnerRow);
 		}
+		this.gameFocus();
 		this.setState({ markerPositions, tilesOwner, positionsMark, lineOwner });
 	}
 
 	render() {
 		const { mapSize, diceValues, markerPositions, tilesOwner, positionsMark, lineOwner, nowTurn } = this.state;
 		const {
+			gameFocus,
 			throwDices,
-			handleClick
+			handleClick,
+			handleKeyDown
 		} = this;
 
 		return (
-			<div className="container">
-				<div>Game Main : {nowTurn}</div>
+			<div className="container" onClick={gameFocus}>
+				<input ref={ref => (this.gameFocusRef = ref)} onKeyDown={handleKeyDown} />
+				<div>Game Main : {teamName[nowTurn-firstTeamIdx]}</div>
 				{diceValues.length !== 0 ?
 				<div>one:{diceValues[0]} two:{diceValues[1]}</div>
 				:
 				<div>주사위를 던져주세요</div>
 				}
-				<button
-				onClick={throwDices}>
+				<button onClick={throwDices}>
 					주사위 던지기
 				</button>
 				<div className="mapContainer">

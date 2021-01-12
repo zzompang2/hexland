@@ -20,7 +20,7 @@ class MapPosition extends React.Component {
 						{row.map((mark, i) => (
 							<div
 							key={i}
-							onClick={e => handleClick(e, i, j)}>
+							onClick={e => handleClick(i, j)}>
 								<Position isMark={mark} />
 							</div>
 						))}
