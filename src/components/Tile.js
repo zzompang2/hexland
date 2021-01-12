@@ -1,17 +1,8 @@
 import React, { createRef } from "react";
+import { LineColors, FillColors } from '../values/Colors';
 import "./Tile.css";
 
-const lineColors = {
-	A: "red",
-	B: "blue",
-	no: "#e0e0e0",
-	block: "orange"
-};
-const fillColors = {
-	A: "pink",
-	B: "skyblue",
-	no: "white",
-};
+
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -36,7 +27,7 @@ class Tile extends React.Component {
 			ctx.moveTo(0, 0);
 			ctx.lineTo(WIDTH, 0);
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = lineColors[top];
+			ctx.strokeStyle = LineColors[top];
 			ctx.stroke();
 
 			// left line
@@ -44,11 +35,11 @@ class Tile extends React.Component {
 			ctx.moveTo(0, 0);
 			ctx.lineTo(0, HEIGHT);
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = lineColors[left];
+			ctx.strokeStyle = LineColors[left];
 			ctx.stroke();
 
 			// 사각형
-			ctx.fillStyle = fillColors[owner];
+			ctx.fillStyle = FillColors[owner];
 			ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
 		}
 	}

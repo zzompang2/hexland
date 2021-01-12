@@ -1,13 +1,7 @@
 import React, { createRef } from "react";
+import { LineColors } from '../values/Colors';
 import "./Tile.css";
 
-const ownerColors = {
-	A: "red",
-	B: "blue",
-	no: "#e0e0e0",
-	mark: "green",
-	block: "orange"
-};
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -32,7 +26,7 @@ class TileRight extends React.Component {
 			ctx.moveTo(0, 0);
 			ctx.lineTo(0, HEIGHT);
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = ownerColors[left];
+			ctx.strokeStyle = LineColors[left];
 			ctx.stroke();
 
 			ctx.font = "10px gothic";

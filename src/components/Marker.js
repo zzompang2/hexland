@@ -1,13 +1,7 @@
 import React, { createRef } from "react";
+import { LineColors, FillColors } from '../values/Colors';
 import "./Marker.css";
 
-const ownerColors = {
-	A: "red",
-	B: "blue",
-	no: "#e0e0e0",
-	mark: "green",
-	block: "orange"
-};
 const WIDTH = 20;
 const HEIGHT = 20;
 
@@ -25,12 +19,12 @@ class Marker extends React.Component {
 			let circle = new Path2D();
 
 			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-3, 0, 2 * Math.PI);
-			ctx.fillStyle = "black";
+			ctx.fillStyle = LineColors[0];
 			ctx.fill(circle);
 
 			circle = new Path2D();
 			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-5, 0, 2 * Math.PI);
-			ctx.fillStyle = ownerColors[owner];
+			ctx.fillStyle = LineColors[owner];
 			ctx.fill(circle);
 		}
 
@@ -39,10 +33,8 @@ class Marker extends React.Component {
 	}
 
 	shouldComponentUpdate(newProps) {
-		if(newProps.position.x !== this.props.position.x ||
-			 newProps.position.y !== this.props.position.y)
-			return true;
-		return false;
+		return (newProps.position.x !== this.props.position.x ||
+			 			newProps.position.y !== this.props.position.y);
 	}
 
 	render() {
