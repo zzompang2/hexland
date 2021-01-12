@@ -4,25 +4,34 @@
 	--background: #ffcf6f;
 	--black: black;
 	--green: #22bc7d;
+	--blue: #0067bb;
+	--red: #ff4334;
 }
 
 .container {
 	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	height: 100vh;
+	min-width: 580px;
+}
+
+.container__bgImage,
+.container__column {
+	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: space-between;
-	height: 100vh;
+	height: 100%;
+	padding: 0 2rem;
 }
 
-.container__row {
-	display: flex;
-	align-items:flex-start;
-}
-
-.container__links {
+.container__link {
 	display: flex;
 	flex-direction: column;
-	padding: 2rem 5rem;
+}
+
+.container__bgImage {
+	justify-content: flex-end;
 }
 
 .home__link {
@@ -32,13 +41,64 @@
 	font-family: 'Gugi', cursive;
 	text-align: center;
 	text-decoration: none;
+	min-width: 10rem;
+}
+
+.logo__whiteBox {
+	background-color: white;
+	width: 20rem;
+	height: 15%;
 }
 
 .image__logo {
 	width: 20rem;
 }
 
-.image__cat,
-.image__dog {
+.bg__blueBox,
+.bg__redBox {
+	width: 19rem;
+	height: 15%;
+}
+
+.bg__blueBox {
+	background-color: var(--blue);
+}
+
+.bg__redBox {
+	background-color: var(--red);
+}
+
+.bg__cat,
+.bg__dog {
 	width: 20rem;
+}
+
+.container__bgImage__small {
+	display: none;
+}
+
+@media screen and (max-width: 1200px) {
+	.logo__whiteBox,
+	.container__bgImage {
+		display: none;
+	}
+
+	.container__column {
+		justify-content: space-between;
+	}
+
+	.container__bgImage__small {
+		display: initial;
+		/* div 사이의 간격 없애기 */
+		font-size: 0;
+	}
+
+	.image__logo {
+		width: 15rem;
+	}
+	.bg__cat,
+	.bg__dog {
+		width: 10rem;
+		margin: 4rem 2rem 0 2rem;
+	}
 }

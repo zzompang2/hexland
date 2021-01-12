@@ -2,23 +2,17 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: space-around;
 	height: 100vh;
-}
-
-.container__column {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	height: 100%;
-	padding: 0 2rem;
+	min-width: 580px;
 }
 
 .container__top {
 	display: flex;
 	min-height: 96px;
 	align-items:center;
-	/* background-color: pink; */
+	/* navigation 과 겹치지 않기 위해 */
+	margin-top: 3rem;
 }
 
 .container__top div {
@@ -40,9 +34,44 @@
 	position: relative;
 }
 
+/* ========== 배경 이미지 ========== */
+
+.image__cat,
+.image__dog {
+	width: 15rem;
+}
+
+.logo__blueBox,
+.logo__redBox {
+	width: 14.25rem;
+	height: 20%;
+}
+
+.logo__blueBox {
+	background-color: var(--blue);
+}
+
+.logo__redBox {
+	background-color: var(--red);
+}
+
+.icon__cat,
+.icon__dog {
+	width: 4rem;
+	padding: 0 2rem;
+}
+
+/* ========== 키보드 키 사용 설명 부분 ========== */
+
 .container__button {
 	display: flex;
-	padding: 3rem 0;
+	padding-top: 3rem;
+	/* container__score__bottom 과 겹쳐지지 않게 하기 위해 */
+	padding-bottom: 5rem;
+}
+
+.container__button button {
+	font-size: 1rem;
 }
 
 .container__spacebar {
@@ -52,11 +81,11 @@
 }
 
 .button__spacebar {
-	width: 15rem;
-	height: 3rem;
+	width: 18rem;
+	height: 5rem;
 	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
 	border: .1rem solid #ffffff55;
-	border-radius: 1.5rem;
+	border-radius: 3rem;
 	color: white;
 }
 
@@ -71,15 +100,16 @@
 .container__arrowKey {
 	display: flex;
 	flex-direction: column;
-	width: 9.4rem;
-	height: 3rem;
+	width: 12.8rem;
+	height: 5rem;
 	align-items: center;
 	justify-content: space-between;
 }
 
-.container__arrow,
+.container__arrow p,
 .container__spacebar p {
 	color: white;
+	font-size: 1.3rem;
 }
 
 .container__arrowKey div {
@@ -89,44 +119,81 @@
 }
 
 .button__arrow {
-	width: 3rem;
-	height: 1.4rem;
+	width: 4rem;
+	height: 2.2rem;
 	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
 	border: .1rem solid #ffffff55;
 	border-radius: 1.5rem;
 	color: white;
 }
 
+/* ==========점수판 관련 ========== */
+
 .score__bg,
 .score__highlight {
 	display: flex;
-	width: 7rem;
-	height: 7rem;
+	width: 6rem;
+	height: 6rem;
 	align-items: center;
 	justify-content: center;
 	transform: rotate(45deg);
 	border-radius: 5rem 5rem 0 5rem;
-}
-
-.score__highlight {
-	width: 10rem;
-	height: 10rem;
+	/* 회전으로 인해 이미지와 살짝 겹치는 것을 피하기 위해 */
+	margin: 1rem 0;
 }
 
 .score__bg {
 	background-color: white;
 	color: black;
-	font-size: 3rem;
+	font-size: 2.5rem;
 }
 
 .score__highlight {
 	background-color: var(--green);
 	color: white;
 	font-size: 5rem;
+	/* 차례인 쪽 크기 커지기 */
+	width: 10rem;
+	height: 10rem;
 }
 
 .score__bg div,
 .score__highlight div {
 	transform: rotate(-45deg);
 	/* font-size: 4rem; */
+}
+
+.container__score__bottom {
+	display: none;
+}
+
+@media screen and (max-width: 1200px) {
+	.container__score__bottom {
+		position: fixed;
+		bottom: 0;
+		display: flex;
+		width: 100vw;
+		height: 4rem;
+		background-color: white;
+		align-items: center;
+		justify-content: space-around;
+		z-index: 1;
+		min-width: 580px;
+	}
+
+	.score__bg,
+	.score__highlight {
+		display: flex;
+		width: 50%;
+		height: 100%;
+		font-size: 2rem;
+		border-radius: 0;
+		margin: 0;
+		transform: rotate(0);
+	}
+
+	.score__bg div,
+	.score__highlight div {
+		transform: rotate(0);
+	}
 }

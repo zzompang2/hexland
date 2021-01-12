@@ -7,6 +7,8 @@ import Navigation from "../components/Navigation";
 import "./Game.css";
 import cat from "../images/bg_cat.png";
 import dog from "../images/bg_dog.png";
+import icon_cat from "../images/icon_cat.png";
+import icon_dog from "../images/icon_dog.png";
 
 const mapSize = {x: 20, y: 20};
 const noOwner = 0;
@@ -499,21 +501,25 @@ class Game extends React.Component {
 
 		return (
 			<div className="container__game" onClick={gameFocus}>
-				<Navigation />
-				<div className="container__column" style={{justifyContent: "flex-end"}}>
-					<div />
+
+				{/* 고양이 */}
+				<div className="container__bgImage">
 					<div className={nowTurn === firstTeamIdx ? "score__highlight" : "score__bg"}>
 						<div>{scores[0]}</div>
 					</div>
 					<img className="image__cat" src={cat} alt="고양이" />
+					<div className="logo__blueBox" />
 				</div>
+
 				<div className="container__column">
+					
+					<Navigation />
+
 					{/* 키보드 조작을 위한 input */}
 					<input
 						className="gameFocusInput"
 						ref={ref => (this.gameFocusRef = ref)}
 						onKeyDown={e => handleKeyDown(e.keyCode)} />
-					
 
 					<div className="container__top">
 						{!isGameReady ?
@@ -539,6 +545,8 @@ class Game extends React.Component {
 							firstTeamIdx={firstTeamIdx}
 							nowTurn={nowTurn} />
 					</div>
+
+					{/* 키보드 사용 설명서 */}
 					<div className="container__button">
 						<div className="container__spacebar">
 							<button className="button__spacebar" disabled={!isGameReady} onClick={throwDices}>
@@ -566,13 +574,27 @@ class Game extends React.Component {
 							<p>이동하기</p>
 						</div>
 					</div>
+
+					{/* 작은창에서의 점수판 */}
+					<div className="container__score__bottom">
+						<div className={nowTurn === firstTeamIdx ? "score__highlight" : "score__bg"}>
+							<img className="icon__cat" src={icon_cat} alt="고양이" />
+							<div>{scores[0]}</div>
+						</div>
+						<div className={nowTurn === firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
+							<div>{scores[1]}</div>
+							<img className="icon__dog" src={icon_dog} alt="강아지" />
+						</div>
+					</div>
 				</div>
-				<div className="container__column" style={{justifyContent: "flex-end"}}>
-					<div />
+
+				{/* 강아지 */}
+				<div className="container__bgImage">
 					<div className={nowTurn === firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
 						<div>{scores[1]}</div>
 					</div>
 					<img className="image__dog" src={dog} alt="강아지" />
+					<div className="logo__redBox" />
 				</div>
 			</div>
 		)
