@@ -1,9 +1,5 @@
 import React, { createRef } from "react";
 import { LineColors } from '../values/Colors';
-import "./Tile.css";
-
-const WIDTH = 20;
-const HEIGHT = 20;
 
 class TileRight extends React.Component {
 	state = {
@@ -12,19 +8,19 @@ class TileRight extends React.Component {
 
 	draw() {
 		let { canvasRef } = this.state;
-		const { index, left } = this.props;
+		const { tileSize: {width, height}, left } = this.props;
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
 			let ctx = canvas.getContext('2d');
 
 			// 캔버스 지우기
-			ctx.clearRect(0, 0, WIDTH, HEIGHT);
+			ctx.clearRect(0, 0, width, height);
 
 			// left line
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			ctx.lineTo(0, HEIGHT);
+			ctx.lineTo(0, height);
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = LineColors[left];
 			ctx.stroke();
@@ -41,7 +37,7 @@ class TileRight extends React.Component {
 
 	render() {
 		const { canvasRef } = this.state;
-		console.log("TileRight: render");
+		const { tileSize: {height} } = this.props;
 
 		this.draw();
 
@@ -49,7 +45,7 @@ class TileRight extends React.Component {
 			<canvas
 			ref={canvasRef}
 			width={4} 
-			height={HEIGHT} />
+			height={height} />
 		)
 	}
 }

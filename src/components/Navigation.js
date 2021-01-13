@@ -8,7 +8,7 @@ class Navigation extends React.Component {
 			<div className="navigation">
 				<Link
 					to={{pathname: "/"}} >
-					뒤로 가기
+					처음으로
 				</Link>
 			</div>
 		)

@@ -1,0 +1,83 @@
+.container__beforeStart {
+	width: 100vw;
+	height: 100vh;
+}
+
+.container__choices {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%);
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.question {
+	font-size: 1.4rem;
+	margin: 1.5rem 0 0 0;
+}
+
+.question__comment {
+	font-size: 1rem;
+	margin: 0 0 .5rem;
+	color: #00000066;
+}
+
+.container__choice {
+	display: flex;
+	flex-direction: row;
+}
+
+.choice__mark,
+.choice {
+	display: flex;
+	flex-direction: column;
+	width: 12rem;
+	height: 6rem;
+	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
+	border: .2rem solid #ffffff55;
+	align-items: center;
+	justify-content: center;
+	border-radius: 1rem;
+	margin-right: 1rem;
+	font-size: 1.5rem;
+	color: white;
+}
+
+.choice__mark {
+	background-color: var(--green);
+	color: white;
+}
+
+.choice__mark p,
+.choice p {
+	margin: 0;
+}
+
+.choice__cat,
+.choice__dog {
+	width: 4rem;
+}
+
+/* ==== 게임 시작 버튼 ==== */
+
+.button__gamestart {
+	width: 100%;
+	height: 3rem;
+	margin: 2rem 0;
+}
+
+.button__gamestart a {
+	text-decoration: none;
+}
+
+.button__gamestart p {
+	background-color: var(--green);
+	padding : 2rem;
+	text-align: center;
+	color: white;
+	border-radius: 4rem;
+	font-size: 1.5rem;
+}

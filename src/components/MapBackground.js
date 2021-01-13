@@ -9,8 +9,7 @@ const background = 4;
 class MapBackground extends React.Component {
 
 	render() {
-		const { mapSize, tilesOwner } = this.props;
-		console.log("MapLine: render");
+		const { tileSize, mapSize, tilesOwner } = this.props;
 
 		return (
 			<div className="container__mapbg">
@@ -22,13 +21,13 @@ class MapBackground extends React.Component {
 							{ownerRow.map((owner, i) => {
 								if(j !== mapSize.y) {
 									if(i !== mapSize.x)
-										return (<Tile key={i} owner={background} lineOwner={{top: background, left: background}} />);
+										return (<Tile key={i} tileSize={tileSize} owner={background} lineOwner={{top: background, left: background}} />);
 									else
-										return (<TileRight key={i} index={j} left={background} />);
+										return (<TileRight key={i} tileSize={tileSize} left={background} />);
 								}
 								else {
 									if(i !== mapSize.x)
-										return (<TileBottom key={i} index={i} top={background} />);
+										return (<TileBottom key={i} tileSize={tileSize} top={background} />);
 									else
 										return null;
 								}

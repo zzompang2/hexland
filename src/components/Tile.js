@@ -1,30 +1,27 @@
 import React, { createRef } from "react";
 import { LineColors, FillColors } from '../values/Colors';
-import "./Tile.css";
-
-const WIDTH = 20;
-const HEIGHT = 20;
 
 class Tile extends React.Component {
 	state = {
-		canvasRef: createRef()
+		canvasRef: createRef(),
 	}
 
 	draw() {
 		let { canvasRef } = this.state;
-		const { owner, lineOwner: {top, left} } = this.props;
+		const { tileSize: {width, height}, owner, lineOwner: {top, left} } = this.props;
+
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
 			let ctx = canvas.getContext('2d');
 
 			// 캔버스 지우기
-			ctx.clearRect(0, 0, WIDTH, HEIGHT);
+			ctx.clearRect(0, 0, width, height);
 
 			// top line
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			ctx.lineTo(WIDTH, 0);
+			ctx.lineTo(width, 0);
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = LineColors[top];
 			ctx.stroke();
@@ -32,14 +29,14 @@ class Tile extends React.Component {
 			// left line
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			ctx.lineTo(0, HEIGHT);
+			ctx.lineTo(0, height);
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = LineColors[left];
 			ctx.stroke();
 
 			// 사각형
 			ctx.fillStyle = FillColors[owner];
-			ctx.fillRect(2, 2, WIDTH-2, HEIGHT-2);
+			ctx.fillRect(2, 2, width-2, height-2);
 		}
 	}
 
@@ -55,7 +52,7 @@ class Tile extends React.Component {
 
 	render() {
 		const { canvasRef } = this.state;
-		console.log("Tile: render");
+		const { tileSize: {width, height} } = this.props;
 
 		this.draw();
 
@@ -63,8 +60,8 @@ class Tile extends React.Component {
 			<canvas
 			className="tile"
 			ref={canvasRef}
-			width={WIDTH} 
-			height={HEIGHT} />
+			width={width} 
+			height={height} />
 		)
 	}
 }

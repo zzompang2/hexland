@@ -41,7 +41,6 @@ class Dice extends React.Component {
 	render() {
 		const { canvasRef } = this.state;
 		const { value } = this.props;
-		console.log("Dice: render");
 
 		this.draw();
 

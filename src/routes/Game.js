@@ -10,18 +10,18 @@ import dog from "../images/bg_dog.png";
 import icon_cat from "../images/icon_cat.png";
 import icon_dog from "../images/icon_dog.png";
 
-const mapSize = {x: 20, y: 20};
+
 const noOwner = 0;
 const block = 1;
-const firstTeamIdx = 2;
 const teamNum = 2;
-const teamName = ["고양이", "강아지"];
 
 class Game extends React.Component {
 	state = {
-		mapSize: mapSize,
-		isGameReady: false,
-		nowTurn: firstTeamIdx,
+		isMount: false,
+		firstTeamIdx: undefined,
+		tileSize: undefined,
+		mapSize: undefined,
+		nowTurn: 0,
 		markerPositions: [],
 		scores: [0, 0],
 		diceValues: [],
@@ -38,7 +38,7 @@ class Game extends React.Component {
 	 * 나머지 하나는 거리로 한다.
 	 */
 	throwDices = () => {
-		const { mapSize, nowTurn, markerPositions, positionsMark, candidatePos } = this.state;
+		const { firstTeamIdx, mapSize, nowTurn, markerPositions, positionsMark, candidatePos } = this.state;
 		let nextTurn = nowTurn;
 
 		// 이미 주사위를 던진 경우
@@ -56,7 +56,8 @@ class Game extends React.Component {
 		// 주사위 결과
 		const diceValues = [
 			Math.floor(Math.random() * 4) + 1, 
-			Math.floor(Math.random() * 4) + 1];
+			Math.floor(Math.random() * 4) + 1
+		];
 
 		/**
 		 * DIR 방향으로 DIS 거리 이동할 때 도착하는 곳의 좌표를
@@ -67,28 +68,32 @@ class Game extends React.Component {
 			const markerPosition = markerPositions[nowTurn - firstTeamIdx];
 			switch(dir) {
 				case 1:
-					candX = markerPosition.x;
-					candY = Math.max(markerPosition.y - dis, 0);
-					break;
-				case 2:
-					candX = Math.min(markerPosition.x + dis, mapSize.x);
-					candY = markerPosition.y;
-					break;
 				case 3:
 					candX = markerPosition.x;
+					candY = Math.max(markerPosition.y - dis, 0);
+					checkSameAsCurrent(candX, candY);
+					candX = markerPosition.x;
 					candY = Math.min(markerPosition.y + dis, mapSize.y);
+					checkSameAsCurrent(candX, candY);
 					break;
+				case 2:
 				case 4:
+					candX = Math.min(markerPosition.x + dis, mapSize.x);
+					candY = markerPosition.y;
+					checkSameAsCurrent(candX, candY);
 					candX = Math.max(markerPosition.x - dis, 0);
 					candY = markerPosition.y;
+					checkSameAsCurrent(candX, candY);
 					break;
 				default:
 					return;
 			}
-			// 현재 위치와 다른 경우에만 후보에 추가
-			if(markerPosition.x !== candX || markerPosition.y !== candY) {
-				candidatePos.push({x: candX, y: candY});
-				positionsMark[candY][candX] = true;
+			function checkSameAsCurrent(x, y) {
+				// 현재 위치와 다른 경우에만 후보에 추가
+				if(markerPosition.x !== x || markerPosition.y !== y) {
+					candidatePos.push({x, y});
+					positionsMark[y][x] = true;
+				}
 			}
 		};
 		
@@ -219,8 +224,6 @@ class Game extends React.Component {
 			}
 		}
 
-		console.log(closedShapeLines);
-
 		if(closedShapeLines.length === 0)
 			return [];
 
@@ -235,7 +238,6 @@ class Game extends React.Component {
 					mostLeftTile = {x, y};
 			}
 		}
-		console.log(mostLeftTile);
 		shouldFillTiles.push( mostLeftTile );
 
 		// mostLeftTile 을 시작으로 인접한 타일을 칠하고 배열에 추가
@@ -283,40 +285,27 @@ class Game extends React.Component {
 	}
 
 	handleClick = (x, y) => {
-		let { isGameReady } = this.state;
-		const { nowTurn, markerPositions, candidatePos } = this.state;
+		const { candidatePos } = this.state;
 		let newPosition;
 		
 		console.log("타일 클릭:", x, y);
 
-		// 게임 시작 전, 초기 위치를 선택
-		if(!isGameReady) {
-			markerPositions.push({x, y});
-			if(markerPositions.length === teamNum)
-				isGameReady = true;
-			const nextTurn = nowTurn + 1 < firstTeamIdx + teamNum ? nowTurn + 1 : firstTeamIdx;
-			this.setState({ nowTurn: nextTurn, isGameReady, markerPositions });
-		}
-
-		// 게임 시작!
-		else {
-			// 후보들 중에 클릭한 좌표가 있는지 검사
-			for(let i=0; i<candidatePos.length; i++) {
-				const pos = candidatePos[i];
-				if(pos.x === x && pos.y === y) {
-					newPosition = pos;
-					break;
-				}
+		// 후보들 중에 클릭한 좌표가 있는지 검사
+		for(let i=0; i<candidatePos.length; i++) {
+			const pos = candidatePos[i];
+			if(pos.x === x && pos.y === y) {
+				newPosition = pos;
+				break;
 			}
-			if(newPosition === undefined)
-				return;
-
-			this.markMoveTo(x, y);
 		}
+		if(newPosition === undefined)
+			return;
+
+		this.markMoveTo(x, y);
 	}
 
 	markMoveTo = (newX, newY) => {
-		const { mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner, scores } = this.state;
+		const { firstTeamIdx, mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner, scores } = this.state;
 		const markerPosition = markerPositions[nowTurn - firstTeamIdx];
 		const shouldFillTiles = [];
 		const lineOwnerCopy = [];
@@ -416,13 +405,9 @@ class Game extends React.Component {
 	}
 
 	handleKeyDown = (keyCode) => {
-		console.log("Key press", keyCode);
-		const { isGameReady, nowTurn, markerPositions, candidatePos } = this.state;
+		const { firstTeamIdx, nowTurn, markerPositions, candidatePos } = this.state;
 		const position = markerPositions[nowTurn - firstTeamIdx];
 		const { throwDices, markMoveTo } = this;
-
-		if(!isGameReady)
-			return;
 
 		if(keyCode === 32)
 			throwDices();
@@ -465,19 +450,42 @@ class Game extends React.Component {
 	}
 
 	gameFocus = () => {
-		console.log("game focus");
 		this.gameFocusRef.focus();
 	}
 
-	componentDidMount() {
-		const { tilesOwner, positionsMark, mapSize: {x, y}, lineOwner } = this.state;
+	componentDidUpdate() {
+		this.gameFocus();
+	}
 
-		for (let j=0; j<=y; j++) {
+	componentDidMount() {
+		const { markerPositions, tilesOwner, positionsMark, lineOwner } = this.state;
+		const { location: { state }, history } = this.props;
+
+		// /game 에서 새로고침 되어서 state 를 받지 못한 경우, 홈으로 돌아가기
+		if(state === undefined) {
+			history.push("/");
+			return;
+		}
+		
+		const { firstTeamIdx, mapLength, mapSize, nowTurn } = state;
+
+		const startY = Math.floor(mapSize.y/2);
+		if (mapSize.x % 2 === 0) {
+			markerPositions.push({x: mapSize.x/2-1, y: startY});
+			markerPositions.push({x: mapSize.x/2+1, y: startY});
+		}
+		else {
+			const startX = Math.floor(mapSize.x/2);
+			markerPositions.push({x: startX, y: startY});
+			markerPositions.push({x: startX+1, y: startY});
+		}
+
+		for (let j=0; j<=mapSize.y; j++) {
 			const tilesOwnerRow = [];
 			const markRow = [];
 			const lineOwnerRow = [];
 
-			for (let i=0; i<=x; i++) {
+			for (let i=0; i<=mapSize.x; i++) {
 				tilesOwnerRow.push(noOwner);
 				markRow.push(false);
 				lineOwnerRow.push({top: noOwner, left: noOwner});
@@ -486,18 +494,25 @@ class Game extends React.Component {
 			positionsMark.push(markRow);
 			lineOwner.push(lineOwnerRow);
 		}
-		this.gameFocus();
-		this.setState({ tilesOwner, positionsMark, lineOwner });
+
+		// tile 사이즈 계산
+		const width = mapLength.width / mapSize.x;
+		const height = mapLength.height / mapSize.y;
+
+		this.setState({ isMount: true, firstTeamIdx, nowTurn, tileSize: {width, height}, mapSize, markerPositions, tilesOwner, positionsMark, lineOwner });
 	}
 
 	render() {
-		const { isGameReady, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
+		const { isMount, firstTeamIdx, tileSize, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
 		const {
 			gameFocus,
 			throwDices,
 			handleClick,
 			handleKeyDown
 		} = this;
+
+		if(!isMount)
+			return null;
 
 		return (
 			<div className="container__game" onClick={gameFocus}>
@@ -522,51 +537,46 @@ class Game extends React.Component {
 						onKeyDown={e => handleKeyDown(e.keyCode)} />
 
 					<div className="container__top">
-						{!isGameReady ?
-							<div><b>{teamName[nowTurn-firstTeamIdx]}</b>야, 어디서 출발할래?</div>
-							:
-							<div>
-								{/* 주사위 결과창 */}
-								<div className="container__dice">
-									<Dice value={diceValues[0] === undefined ? "" : diceValues[0]} />
-									<Dice value={diceValues[1] === undefined ? "" : diceValues[1]} />
-								</div>
-							</div>
-						}
+						{/* 주사위 결과창 */}
+						<div className="container__dice">
+							<Dice value={diceValues[0] === undefined ? "" : diceValues[0]} />
+							<Dice value={diceValues[1] === undefined ? "" : diceValues[1]} />
+						</div>
 					</div>
 
 					<div className="container__map">
-						<MapBackground mapSize={mapSize} tilesOwner={tilesOwner} />
-						<MapTile mapSize={mapSize} tilesOwner={tilesOwner} lineOwner={lineOwner} />
+						<MapBackground tileSize={tileSize} mapSize={mapSize} tilesOwner={tilesOwner} />
+						<MapTile tileSize={tileSize} mapSize={mapSize} tilesOwner={tilesOwner} lineOwner={lineOwner} />
 						<MapPosition
-							positionsMark={positionsMark}
-							handleClick={handleClick}
-							markerPositions={markerPositions}
-							firstTeamIdx={firstTeamIdx}
-							nowTurn={nowTurn} />
+						tileSize={tileSize}
+						positionsMark={positionsMark}
+						handleClick={handleClick}
+						markerPositions={markerPositions}
+						firstTeamIdx={firstTeamIdx}
+						nowTurn={nowTurn} />
 					</div>
 
 					{/* 키보드 사용 설명서 */}
 					<div className="container__button">
 						<div className="container__spacebar">
-							<button className="button__spacebar" disabled={!isGameReady} onClick={throwDices}>
+							<button className="button__spacebar" onClick={throwDices}>
 								SPACE BAR
 							</button>
 							<p>주사위 굴리기</p>
 						</div>
 						<div className="container__arrow">
 							<div className="container__arrowKey">
-								<button className="button__arrow" disabled={!isGameReady} onClick={()=>handleKeyDown(38)}>
+								<button className="button__arrow" onClick={()=>handleKeyDown(38)}>
 									^
 								</button>
 								<div>
-									<button className="button__arrow" disabled={!isGameReady} onClick={()=>handleKeyDown(37)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(37)}>
 										{"<"}
 									</button>
-									<button className="button__arrow" disabled={!isGameReady} onClick={()=>handleKeyDown(40)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(40)}>
 										v
 									</button>
-									<button className="button__arrow" disabled={!isGameReady} onClick={()=>handleKeyDown(39)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(39)}>
 										{">"}
 									</button>
 								</div>

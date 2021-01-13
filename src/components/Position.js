@@ -1,9 +1,8 @@
 import React, { createRef } from "react";
+import { LineColors, FillColors } from '../values/Colors';
 import "./Position.css";
 
-const markColor = "green";
-const WIDTH = 20;
-const HEIGHT = 20;
+const mark = 1;
 
 class Position extends React.Component {
 	state = {
@@ -13,20 +12,22 @@ class Position extends React.Component {
 	// mark or clean
 	draw(isMark) {
 		let { canvasRef } = this.state;
+		const { tileSize: {width, height} } = this.props;
+
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
 			let ctx = canvas.getContext('2d');
 
 			// 캔버스 지우기
-			ctx.clearRect(0, 0, WIDTH, HEIGHT);
+			ctx.clearRect(0, 0, width, height);
 
 			if(isMark) {
 				// 사각형
-				ctx.fillStyle = markColor;
-				ctx.fillRect(WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-				ctx.fillStyle = "white";
-				ctx.fillRect(WIDTH/4+2, HEIGHT/4+2, WIDTH/2-4, HEIGHT/2-4);
+				ctx.fillStyle = LineColors[mark];
+				ctx.fillRect(width/4, height/4, width/2, height/2);
+				ctx.fillStyle = FillColors[mark];
+				ctx.fillRect(width/4+2, height/4+2, width/2-4, height/2-4);
 			}
 		}
 	}
@@ -41,7 +42,7 @@ class Position extends React.Component {
 
 	render() {
 		const { canvasRef } = this.state;
-		const { isMark } = this.props;
+		const { isMark, tileSize: {width, height} } = this.props;
 
 		this.draw(isMark);
 
@@ -49,8 +50,8 @@ class Position extends React.Component {
 			<canvas
 			className="pos"
 			ref={canvasRef}
-			width={WIDTH} 
-			height={HEIGHT} />
+			width={width} 
+			height={height} />
 		)
 	}
 }

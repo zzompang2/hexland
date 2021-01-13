@@ -2,8 +2,6 @@ import React, { createRef } from "react";
 import { LineColors } from '../values/Colors';
 import "./Map.css";
 
-const WIDTH = 20;
-const HEIGHT = 20;
 const mark = 1;
 
 class Marker extends React.Component {
@@ -13,7 +11,7 @@ class Marker extends React.Component {
 
 	draw() {
 		let { canvasRef } = this.state;
-		const { owner, nowTurn } = this.props;
+		const { owner, nowTurn, tileSize: {width, height} } = this.props;
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {
@@ -21,16 +19,16 @@ class Marker extends React.Component {
 			let circle = new Path2D();
 
 			// 캔버스 지우기
-			ctx.clearRect(0, 0, WIDTH, HEIGHT);
+			ctx.clearRect(0, 0, width, height);
 
 			if(owner === nowTurn) {
-				circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2, 0, 2 * Math.PI);
+				circle.arc(width/2, height/2, width/2, 0, 2 * Math.PI);
 				ctx.fillStyle = LineColors[mark];
 				ctx.fill(circle);
 			}
 
 			circle = new Path2D();
-			circle.arc(WIDTH/2, HEIGHT/2, WIDTH/2-3, 0, 2 * Math.PI);
+			circle.arc(width/2, height/2, width/2-3, 0, 2 * Math.PI);
 			ctx.fillStyle = LineColors[owner];
 			ctx.fill(circle);
 		}
@@ -47,23 +45,22 @@ class Marker extends React.Component {
 	}
 
 	render() {
-		console.log("Marker: render", this.props.owner);
 		const { canvasRef } = this.state;
-		const { position } = this.props;
+		const { position, tileSize: {width, height} } = this.props;
 
 		this.draw();
 
 		const styles = {
-			top: position.y * HEIGHT,
-			left: position.x * WIDTH
+			top: position.y * height,
+			left: position.x * width
 		};
 
 		return (
 			<div className="container__marker" style={styles}>
 				<canvas
 				ref={canvasRef}
-				width={WIDTH}
-				height={HEIGHT} />
+				width={width}
+				height={height} />
 			</div>
 		)
 	}

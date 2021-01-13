@@ -5,12 +5,12 @@ import "./Map.css";
 
 class MapPosition extends React.Component {
 	render() {
-		const { positionsMark, handleClick, markerPositions, firstTeamIdx, nowTurn } = this.props;
+		const { tileSize, positionsMark, handleClick, markerPositions, firstTeamIdx, nowTurn } = this.props;
 
 		return (
 			<div className="pos_column">
 				{markerPositions.map((position, idx) =>
-					<Marker key={idx} owner={firstTeamIdx + idx} position={position} nowTurn={nowTurn} />
+					<Marker key={idx} tileSize={tileSize} owner={firstTeamIdx + idx} position={position} nowTurn={nowTurn} />
 				)}
 				{positionsMark.map((row, j) => (
 					<div 
@@ -20,7 +20,7 @@ class MapPosition extends React.Component {
 							<div
 							key={i}
 							onClick={e => handleClick(i, j)}>
-								<Position isMark={mark} />
+								<Position tileSize={tileSize} isMark={mark} />
 							</div>
 						))}
 					</div>

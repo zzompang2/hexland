@@ -4,7 +4,7 @@
 	align-items: center;
 	justify-content: space-around;
 	height: 100vh;
-	min-width: 580px;
+	min-width: 520px;
 }
 
 .container__top {
@@ -81,7 +81,7 @@
 }
 
 .button__spacebar {
-	width: 18rem;
+	width: 15rem;
 	height: 5rem;
 	background: linear-gradient(160deg, #ffffff30 60%, #ffffff55 1%, #ffffff20);
 	border: .1rem solid #ffffff55;
@@ -94,7 +94,7 @@
 	flex-direction: column;
 	align-items: center;
 	/* 스페이스바 버튼이랑 간격 */
-	padding: 0 0 0 3rem;
+	padding-left: 3rem;
 }
 
 .container__arrowKey {
@@ -160,7 +160,6 @@
 .score__bg div,
 .score__highlight div {
 	transform: rotate(-45deg);
-	/* font-size: 4rem; */
 }
 
 .container__score__bottom {
@@ -177,8 +176,8 @@
 		background-color: white;
 		align-items: center;
 		justify-content: space-around;
-		z-index: 1;
-		min-width: 580px;
+		z-index: 2;
+		min-width: 520px;
 	}
 
 	.score__bg,
