@@ -417,31 +417,41 @@ class Game extends React.Component {
 
 		switch(keyCode) {
 			case 37:	// 왼쪽
+				let minPosX = position.x;
 				candidatePos.forEach(pos => {
-					if(pos.x < position.x && pos.y === position.y)
-						markMoveTo(pos.x, pos.y);
+					if(pos.x < minPosX && pos.y === position.y)
+						minPosX = pos.x;
 				});
+				if(minPosX !== position.x)
+					markMoveTo(minPosX, position.y);
 				break;
 
 			case 38:	// 위
+				let minPosY = position.y;
 				candidatePos.forEach(pos => {
-					if(pos.x === position.x && pos.y < position.y)
-						markMoveTo(pos.x, pos.y);
+					if(pos.x === position.x && pos.y < minPosY)
+						minPosY = pos.y;	
 				});
+				if(minPosY !== position.y)
+					markMoveTo(position.x, minPosY);
 				break;
 
 			case 39:	// 오른쪽
+				let maxPosX = position.x;
 				candidatePos.forEach(pos => {
-					if(pos.x > position.x && pos.y === position.y)
-						markMoveTo(pos.x, pos.y);
+					if(pos.x > maxPosX && pos.y === position.y)
+						maxPosX = pos.x;
 				});
+				markMoveTo(maxPosX, position.y);
 				break;
 
 			case 40:	// 아래
+			let maxPosY = position.y;
 				candidatePos.forEach(pos => {
-					if(pos.x === position.x && pos.y > position.y)
-						markMoveTo(pos.x, pos.y);
+					if(pos.x === position.x && pos.y > maxPosY)
+						maxPosY = pos.y;
 				});
+				markMoveTo(position.x, maxPosY);
 				break;
 
 			default:
