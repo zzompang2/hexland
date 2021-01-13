@@ -58,7 +58,8 @@
 
 .choice__cat,
 .choice__dog {
-	width: 4rem;
+	width: 3rem;
+	margin-bottom: .3rem;
 }
 
 /* ==== 게임 시작 버튼 ==== */

@@ -2,8 +2,6 @@ import React, { createRef } from "react";
 import { LineColors } from '../values/Colors';
 import "./Map.css";
 
-const mark = 1;
-
 class Marker extends React.Component {
 	state = {
 		canvasRef: createRef()
@@ -11,7 +9,7 @@ class Marker extends React.Component {
 
 	draw() {
 		let { canvasRef } = this.state;
-		const { owner, nowTurn, tileSize: {width, height} } = this.props;
+		const { owner, nowTurn, tileSize: {width, height}, mark } = this.props;
 		let canvas = canvasRef.current;
 
 		if (canvas !== null) {

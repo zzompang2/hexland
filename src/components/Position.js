@@ -2,8 +2,6 @@ import React, { createRef } from "react";
 import { LineColors, FillColors } from '../values/Colors';
 import "./Position.css";
 
-const mark = 1;
-
 class Position extends React.Component {
 	state = {
 		canvasRef: createRef()
@@ -12,7 +10,7 @@ class Position extends React.Component {
 	// mark or clean
 	draw(isMark) {
 		let { canvasRef } = this.state;
-		const { tileSize: {width, height} } = this.props;
+		const { tileSize: {width, height}, mark } = this.props;
 
 		let canvas = canvasRef.current;
 

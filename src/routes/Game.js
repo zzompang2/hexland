@@ -10,9 +10,6 @@ import dog from "../images/bg_dog.png";
 import icon_cat from "../images/icon_cat.png";
 import icon_dog from "../images/icon_dog.png";
 
-
-const noOwner = 0;
-const block = 1;
 const teamNum = 2;
 
 class Game extends React.Component {
@@ -21,7 +18,7 @@ class Game extends React.Component {
 		playerNum: undefined,
 		playerIdx: undefined,
 		computerIdx: undefined,
-		firstTeamIdx: undefined,
+		indexObj: undefined,
 		tileSize: undefined,
 		mapSize: undefined,
 		nowTurn: 0,
@@ -42,7 +39,7 @@ class Game extends React.Component {
 	 * 나머지 하나는 거리로 한다.
 	 */
 	throwDices = () => {
-		const { firstTeamIdx, mapSize, nowTurn, markerPositions, positionsMark, candidatePos } = this.state;
+		const { indexObj: {firstTeamIdx}, mapSize, nowTurn, markerPositions, positionsMark, candidatePos } = this.state;
 		let nextTurn = nowTurn;
 
 		// 이미 주사위를 던진 경우
@@ -50,8 +47,8 @@ class Game extends React.Component {
 			console.log("이동할 좌표 선택해 주세요.");
 			
 			// === 주사위 초기화 (for debug) ===
-			candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
-			this.setState({ diceValues: [], positionsMark, candidatePos: [] });
+			// candidatePos.forEach(pos => positionsMark[pos.y][pos.x] = false);
+			// this.setState({ diceValues: [], positionsMark, candidatePos: [] });
 			// =============================
 
 			return;
@@ -59,7 +56,7 @@ class Game extends React.Component {
 
 		// 주사위 결과
 		const diceValues = [
-			Math.floor(Math.random() * 4) + 1, 
+			Math.floor(Math.random() * 4) + 1,
 			Math.floor(Math.random() * 4) + 1
 		];
 
@@ -123,7 +120,7 @@ class Game extends React.Component {
 	 */
 	fillTiles(startX, startY, direction, lineOwner) {
 		console.log("타일 채우기:", startX, startY, direction);
-		const { mapSize, tilesOwner, nowTurn } = this.state;
+		const { mapSize, tilesOwner, nowTurn, indexObj: {noOwner, firstBlock, firstTeamIdx} } = this.state;
 		const lineOwnerCopy = [];				// for finding closed shape
 		const lineOwnerCopy2 = [];			// for finding tiles to fill
 		const closedShapeLines = [];		// 닫힌 경로를 구성하는 line
@@ -266,10 +263,10 @@ class Game extends React.Component {
 				shouldFillTiles.push({x: tile.x, y: tile.y+1});
 			}
 			// 칠한 타일의 내부선/외곽선 block 하기
-			lineOwner[tile.y][tile.x].top = block;
-			lineOwner[tile.y][tile.x].left = block;
-			lineOwner[tile.y][tile.x+1].left = block;
-			lineOwner[tile.y+1][tile.x].top = block;
+			lineOwner[tile.y][tile.x].top = firstBlock + nowTurn - firstTeamIdx;
+			lineOwner[tile.y][tile.x].left = firstBlock + nowTurn - firstTeamIdx;
+			lineOwner[tile.y][tile.x+1].left = firstBlock + nowTurn - firstTeamIdx;
+			lineOwner[tile.y+1][tile.x].top = firstBlock + nowTurn - firstTeamIdx;
 		};
 
 		// 외곽선은 다시 block 풀기
@@ -310,7 +307,7 @@ class Game extends React.Component {
 	}
 
 	markMoveTo = (newX, newY) => {
-		const { firstTeamIdx, mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner, scores } = this.state;
+		const { indexObj: {firstTeamIdx, firstBlock}, mapSize, nowTurn, markerPositions, tilesOwner, positionsMark, candidatePos, lineOwner, scores } = this.state;
 		const markerPosition = markerPositions[nowTurn - firstTeamIdx];
 		const shouldFillTiles = [];
 		const lineOwnerCopy = [];
@@ -331,7 +328,8 @@ class Game extends React.Component {
 			for(let i=markerPosition.x; i !== newX; i=i+next) {
 				if(next === 1) {
 					if(lineOwnerCopy[markerPosition.y][i].top !== nowTurn &&
-						 lineOwnerCopy[markerPosition.y][i].top !== block) {
+						 lineOwnerCopy[markerPosition.y][i].top !== firstBlock &&
+						 lineOwnerCopy[markerPosition.y][i].top !== firstBlock + 1) {
 						lineOwnerCopy[markerPosition.y][i] = {...lineOwnerCopy[markerPosition.y][i], top: nowTurn};
 						if((i < mapSize.x && (lineOwnerCopy[markerPosition.y][i+1].top === nowTurn || lineOwnerCopy[markerPosition.y][i+1].left === nowTurn))
 							||
@@ -341,7 +339,8 @@ class Game extends React.Component {
 				}
 				else {
 					if(lineOwnerCopy[markerPosition.y][i-1].top !== nowTurn &&
-						 lineOwnerCopy[markerPosition.y][i-1].top !== block) {
+						 lineOwnerCopy[markerPosition.y][i-1].top !== firstBlock &&
+						 lineOwnerCopy[markerPosition.y][i-1].top !== firstBlock + 1) {
 						lineOwnerCopy[markerPosition.y][i-1] = {...lineOwnerCopy[markerPosition.y][i-1], top: nowTurn};
 						if((i-2 >= 0 && lineOwnerCopy[markerPosition.y][i-2].top === nowTurn) ||
 							 (i-1 >= 0 && lineOwnerCopy[markerPosition.y][i-1].left === nowTurn) ||
@@ -357,7 +356,8 @@ class Game extends React.Component {
 			for(let i=markerPosition.y; i !== newY; i=i+next) {
 				if(next === 1) {
 					if(lineOwnerCopy[i][markerPosition.x].left !== nowTurn &&
-						 lineOwnerCopy[i][markerPosition.x].left !== block) {
+						 lineOwnerCopy[i][markerPosition.x].left !== firstBlock &&
+						 lineOwnerCopy[i][markerPosition.x].left !== firstBlock + 1) {
 						lineOwnerCopy[i][markerPosition.x] = {...lineOwnerCopy[i][markerPosition.x], left: nowTurn};
 						if(i < mapSize.y && 
 							(lineOwnerCopy[i+1][markerPosition.x].top === nowTurn || 
@@ -368,7 +368,8 @@ class Game extends React.Component {
 				}
 				else {
 					if(lineOwnerCopy[i-1][markerPosition.x].left !== nowTurn &&
-						 lineOwnerCopy[i-1][markerPosition.x].left !== block) {
+						 lineOwnerCopy[i-1][markerPosition.x].left !== firstBlock &&
+						 lineOwnerCopy[i-1][markerPosition.x].left !== firstBlock + 1) {
 						lineOwnerCopy[i-1][markerPosition.x] = {...lineOwnerCopy[i-1][markerPosition.x], left: nowTurn};
 						if((i > 0 && lineOwnerCopy[i-1][markerPosition.x].top === nowTurn) ||
 							 (i > 1 && lineOwnerCopy[i-2][markerPosition.x].left === nowTurn) ||
@@ -410,7 +411,7 @@ class Game extends React.Component {
 	}
 
 	handleKeyDown = (keyCode) => {
-		const { playerNum, playerIdx, firstTeamIdx, nowTurn, markerPositions, candidatePos } = this.state;
+		const { playerNum, playerIdx, indexObj: {firstTeamIdx}, nowTurn, markerPositions, candidatePos } = this.state;
 		const position = markerPositions[nowTurn - firstTeamIdx];
 		const { throwDices, markMoveTo } = this;
 
@@ -477,7 +478,7 @@ class Game extends React.Component {
 	componentDidUpdate() {
 		this.gameFocus();
 
-		const { playerNum, playerIdx, computerIdx, firstTeamIdx, nowTurn, diceValues, candidatePos, markerPositions } = this.state;
+		const { playerNum, playerIdx, computerIdx, indexObj: {firstTeamIdx}, nowTurn, diceValues, candidatePos, markerPositions } = this.state;
 		const {
 			throwDices,
 			markMoveTo
@@ -532,7 +533,7 @@ class Game extends React.Component {
 					}
 					this.computerPlayerLastDirection = direction;
 				}
-				setTimeout(() => markMoveTo(candPos.x, candPos.y), 1100);
+				setTimeout(() => markMoveTo(candPos.x, candPos.y), 900);
 			}
 		}
 	}
@@ -547,7 +548,7 @@ class Game extends React.Component {
 			return;
 		}
 		
-		const { playerNum, firstTeamIdx, mapLength, mapSize, nowTurn } = state;
+		const { playerNum, indexObj, mapLength, mapSize, nowTurn } = state;
 
 		const startY = Math.floor(mapSize.y/2);
 		if (mapSize.x % 2 === 0) {
@@ -566,9 +567,9 @@ class Game extends React.Component {
 			const lineOwnerRow = [];
 
 			for (let i=0; i<=mapSize.x; i++) {
-				tilesOwnerRow.push(noOwner);
+				tilesOwnerRow.push(indexObj.noOwner);
 				markRow.push(false);
-				lineOwnerRow.push({top: noOwner, left: noOwner});
+				lineOwnerRow.push({top: indexObj.noOwner, left: indexObj.noOwner});
 			}
 			tilesOwner.push(tilesOwnerRow);
 			positionsMark.push(markRow);
@@ -583,24 +584,24 @@ class Game extends React.Component {
 		let playerIdx, computerIdx;
 		if(playerNum === 1) {
 			playerIdx = nowTurn;
-			computerIdx = nowTurn + 1 < firstTeamIdx + teamNum ? nowTurn + 1 : firstTeamIdx;
+			computerIdx = nowTurn + 1 < indexObj.firstTeamIdx + teamNum ? nowTurn + 1 : indexObj.firstTeamIdx;
 		}
 
-		this.setState({ isMount: true, playerNum, playerIdx, computerIdx, firstTeamIdx, nowTurn, tileSize: {width, height}, mapSize, markerPositions, tilesOwner, positionsMark, lineOwner });
+		this.setState({ isMount: true, playerNum, playerIdx, computerIdx, indexObj, nowTurn, tileSize: {width, height}, mapSize, markerPositions, tilesOwner, positionsMark, lineOwner });
 	}
 
 	render() {
-		const { isMount, playerIdx, playerNum, firstTeamIdx, tileSize, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
+		const { isMount, playerIdx, playerNum, indexObj, tileSize, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
 		const {
 			gameFocus,
 			throwDices,
 			handleClick,
 			handleKeyDown
 		} = this;
-
+		
 		if(!isMount)
 			return null;
-
+		
 		const disableButton = playerNum === 1 && playerIdx !== nowTurn;
 
 		return (
@@ -608,7 +609,7 @@ class Game extends React.Component {
 
 				{/* 고양이 */}
 				<div className="container__bgImage">
-					<div className={nowTurn === firstTeamIdx ? "score__highlight" : "score__bg"}>
+					<div className={nowTurn === indexObj.firstTeamIdx ? "score__highlight" : "score__bg"}>
 						<div>{scores[0]}</div>
 					</div>
 					<img className="image__cat" src={cat} alt="고양이" />
@@ -634,15 +635,16 @@ class Game extends React.Component {
 					</div>
 
 					<div className="container__map">
-						<MapBackground tileSize={tileSize} mapSize={mapSize} tilesOwner={tilesOwner} />
+						<MapBackground tileSize={tileSize} mapSize={mapSize} tilesOwner={tilesOwner} indexObj={indexObj}/>
 						<MapTile tileSize={tileSize} mapSize={mapSize} tilesOwner={tilesOwner} lineOwner={lineOwner} />
 						<MapPosition
 						tileSize={tileSize}
 						positionsMark={positionsMark}
 						handleClick={handleClick}
 						markerPositions={markerPositions}
-						firstTeamIdx={firstTeamIdx}
-						nowTurn={nowTurn} />
+						firstTeamIdx={indexObj.firstTeamIdx}
+						nowTurn={nowTurn}
+						indexObj={indexObj} />
 					</div>
 
 					{/* 키보드 사용 설명서 */}
@@ -676,11 +678,11 @@ class Game extends React.Component {
 
 					{/* 작은창에서의 점수판 */}
 					<div className="container__score__bottom">
-						<div className={nowTurn === firstTeamIdx ? "score__highlight" : "score__bg"}>
+						<div className={nowTurn === indexObj.firstTeamIdx ? "score__highlight" : "score__bg"}>
 							<img className="icon__cat" src={icon_cat} alt="고양이" />
 							<div>{scores[0]}</div>
 						</div>
-						<div className={nowTurn === firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
+						<div className={nowTurn === indexObj.firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
 							<div>{scores[1]}</div>
 							<img className="icon__dog" src={icon_dog} alt="강아지" />
 						</div>
@@ -689,7 +691,7 @@ class Game extends React.Component {
 
 				{/* 강아지 */}
 				<div className="container__bgImage">
-					<div className={nowTurn === firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
+					<div className={nowTurn === indexObj.firstTeamIdx+1 ? "score__highlight" : "score__bg"}>
 						<div>{scores[1]}</div>
 					</div>
 					<img className="image__dog" src={dog} alt="강아지" />

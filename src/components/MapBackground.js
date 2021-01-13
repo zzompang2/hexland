@@ -4,12 +4,10 @@ import TileRight from "./TileRight";
 import TileBottom from "./TileBottom";
 import "./Map.css";
 
-const background = 4;
-
 class MapBackground extends React.Component {
 
 	render() {
-		const { tileSize, mapSize, tilesOwner } = this.props;
+		const { tileSize, mapSize, tilesOwner, indexObj: {background} } = this.props;
 
 		return (
 			<div className="container__mapbg">

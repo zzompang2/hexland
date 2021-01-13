@@ -19,13 +19,13 @@ class Home extends React.Component {
 					<div className="container__link">
 						<Link
 							className="home__link"
-							to={{pathname: "/ready"}} >
-							게임 시작
+							to={{pathname: "/intro"}} >
+							게임 소개
 						</Link>
 						<Link
 							className="home__link"
-							to={{pathname: "/"}} >
-							게임 소개
+							to={{pathname: "/ready"}} >
+							게임 시작
 						</Link>
 						<Link
 							className="home__link"
