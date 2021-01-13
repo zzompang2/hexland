@@ -14,7 +14,7 @@ class Home extends React.Component {
 					<div className="bg__blueBox" />
 				</div>
 				<div className="container__column">
-					<div className="logo__whiteBox" />
+					{/* <div className="logo__whiteBox" /> */}
 					<img className="image__logo" src={logo} alt="로고" />
 					<div className="container__link">
 						<Link
@@ -29,7 +29,7 @@ class Home extends React.Component {
 						</Link>
 						<Link
 							className="home__link"
-							to={{pathname: "/"}} >
+							to={{pathname: "/about"}} >
 							만든이
 						</Link>
 					</div>

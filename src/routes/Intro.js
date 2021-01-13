@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from 'react-router-dom';
 import Navigation from "../components/Navigation";
 import "./Intro.css";
 import page1 from "../images/explain_1.png";
