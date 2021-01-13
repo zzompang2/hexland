@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/turf-war/static/css/main.20a05e8e.chunk.css",
-    "main.js": "/turf-war/static/js/main.ed151a9c.chunk.js",
-    "main.js.map": "/turf-war/static/js/main.ed151a9c.chunk.js.map",
+    "main.css": "/turf-war/static/css/main.d56fda6e.chunk.css",
+    "main.js": "/turf-war/static/js/main.40a2cff9.chunk.js",
+    "main.js.map": "/turf-war/static/js/main.40a2cff9.chunk.js.map",
     "runtime-main.js": "/turf-war/static/js/runtime-main.0d8c5abb.js",
     "runtime-main.js.map": "/turf-war/static/js/runtime-main.0d8c5abb.js.map",
     "static/js/2.51baadff.chunk.js": "/turf-war/static/js/2.51baadff.chunk.js",
     "static/js/2.51baadff.chunk.js.map": "/turf-war/static/js/2.51baadff.chunk.js.map",
     "index.html": "/turf-war/index.html",
-    "static/css/main.20a05e8e.chunk.css.map": "/turf-war/static/css/main.20a05e8e.chunk.css.map",
+    "static/css/main.d56fda6e.chunk.css.map": "/turf-war/static/css/main.d56fda6e.chunk.css.map",
     "static/js/2.51baadff.chunk.js.LICENSE.txt": "/turf-war/static/js/2.51baadff.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.0d8c5abb.js",
     "static/js/2.51baadff.chunk.js",
-    "static/css/main.20a05e8e.chunk.css",
-    "static/js/main.ed151a9c.chunk.js"
+    "static/css/main.d56fda6e.chunk.css",
+    "static/js/main.40a2cff9.chunk.js"
   ]
 }
