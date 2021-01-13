@@ -18,6 +18,9 @@ const teamNum = 2;
 class Game extends React.Component {
 	state = {
 		isMount: false,
+		playerNum: undefined,
+		playerIdx: undefined,
+		computerIdx: undefined,
 		firstTeamIdx: undefined,
 		tileSize: undefined,
 		mapSize: undefined,
@@ -31,6 +34,7 @@ class Game extends React.Component {
 		lineOwner: []
 	}
 	gameFocusRef = null;
+	computerPlayerLastDirection = 0;
 
 	/**
 	 * 주사위를 던져 두 개의 랜덤한 숫자를 출력하고 이동할 수 있는 위치를 표시한다.
@@ -101,6 +105,7 @@ class Game extends React.Component {
 		if(diceValues[0] !== diceValues[1])
 			addCandidatePos(diceValues[1], diceValues[0]);
 
+		// 주사위를 굴렸으나 이동할 수 있는 좌표가 하나도 없는 경우
 		if(candidatePos.length === 0) {
 			nextTurn = nowTurn + 1 < firstTeamIdx + teamNum ? nowTurn + 1 : firstTeamIdx;
 			diceValues.length = 0;
@@ -405,9 +410,13 @@ class Game extends React.Component {
 	}
 
 	handleKeyDown = (keyCode) => {
-		const { firstTeamIdx, nowTurn, markerPositions, candidatePos } = this.state;
+		const { playerNum, playerIdx, firstTeamIdx, nowTurn, markerPositions, candidatePos } = this.state;
 		const position = markerPositions[nowTurn - firstTeamIdx];
 		const { throwDices, markMoveTo } = this;
+
+		// 알고리즘과 대결중인 상황에서 플레이어 차례가 아닌 경우
+		if(playerNum === 1 && playerIdx !== nowTurn)
+			return;
 
 		if(keyCode === 32)
 			throwDices();
@@ -442,7 +451,8 @@ class Game extends React.Component {
 					if(pos.x > maxPosX && pos.y === position.y)
 						maxPosX = pos.x;
 				});
-				markMoveTo(maxPosX, position.y);
+				if(maxPosX !== position.x)
+					markMoveTo(maxPosX, position.y);
 				break;
 
 			case 40:	// 아래
@@ -451,7 +461,8 @@ class Game extends React.Component {
 					if(pos.x === position.x && pos.y > maxPosY)
 						maxPosY = pos.y;
 				});
-				markMoveTo(position.x, maxPosY);
+				if(maxPosY !== position.y)
+					markMoveTo(position.x, maxPosY);
 				break;
 
 			default:
@@ -465,6 +476,65 @@ class Game extends React.Component {
 
 	componentDidUpdate() {
 		this.gameFocus();
+
+		const { playerNum, playerIdx, computerIdx, firstTeamIdx, nowTurn, diceValues, candidatePos, markerPositions } = this.state;
+		const {
+			throwDices,
+			markMoveTo
+		} = this;
+
+		// 혼자 플레이하는 상황에서 플레이어의 차례가 아닌 경우(컴퓨터 차례)
+		if(playerNum === 1 && playerIdx !== nowTurn) {
+			// 주사위를 던진다
+			if(diceValues.length === 0) {
+				console.log("플레이어의 차례가 끝나서 알고리즘 차례를 진행합니다.");
+				setTimeout(throwDices, 200);
+			}
+			// 후보들 중 랜덤으로 선택한다. 그런데 만약 이전 턴에 갔던 방향의 역방향이라면
+			// 다른 후보를 선택한다. 모든 후보가 그러하면 마지막으로 본 곳으로 향한다.
+			else {
+				let random = Math.floor(Math.random() * candidatePos.length);
+				let candPos = candidatePos[random];
+				if(candidatePos.length !== 1) {
+					let direction = this.computerPlayerLastDirection;
+					const curPos = markerPositions[computerIdx-firstTeamIdx];
+					for(let i=0; i<candidatePos.length; i++) {
+						if(curPos.x === candPos.x) {
+							if(curPos.y > candPos.y) {
+								if(this.computerPlayerLastDirection !== 3) {
+									direction = 1;
+									break;
+								}
+							}
+							else {
+								if(this.computerPlayerLastDirection !== 1) {
+									direction = 3;
+									break;
+								}
+							}
+						} 
+						else {
+							if(curPos.x < candPos.x) {
+								if(this.computerPlayerLastDirection !== 4) {
+									direction = 2;
+									break;
+								}
+							} 
+							else {
+								if(this.computerPlayerLastDirection !== 2) {
+									direction = 4;
+									break;
+								}
+							}
+						}
+						random = random + 1 < candidatePos.length ? random + 1 : 0;
+						candPos = candidatePos[random];
+					}
+					this.computerPlayerLastDirection = direction;
+				}
+				setTimeout(() => markMoveTo(candPos.x, candPos.y), 1100);
+			}
+		}
 	}
 
 	componentDidMount() {
@@ -477,7 +547,7 @@ class Game extends React.Component {
 			return;
 		}
 		
-		const { firstTeamIdx, mapLength, mapSize, nowTurn } = state;
+		const { playerNum, firstTeamIdx, mapLength, mapSize, nowTurn } = state;
 
 		const startY = Math.floor(mapSize.y/2);
 		if (mapSize.x % 2 === 0) {
@@ -509,11 +579,18 @@ class Game extends React.Component {
 		const width = mapLength.width / mapSize.x;
 		const height = mapLength.height / mapSize.y;
 
-		this.setState({ isMount: true, firstTeamIdx, nowTurn, tileSize: {width, height}, mapSize, markerPositions, tilesOwner, positionsMark, lineOwner });
+		// 알고리즘과 대결해야 하는 경우, player 의 번호를 기억해 둔다
+		let playerIdx, computerIdx;
+		if(playerNum === 1) {
+			playerIdx = nowTurn;
+			computerIdx = nowTurn + 1 < firstTeamIdx + teamNum ? nowTurn + 1 : firstTeamIdx;
+		}
+
+		this.setState({ isMount: true, playerNum, playerIdx, computerIdx, firstTeamIdx, nowTurn, tileSize: {width, height}, mapSize, markerPositions, tilesOwner, positionsMark, lineOwner });
 	}
 
 	render() {
-		const { isMount, firstTeamIdx, tileSize, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
+		const { isMount, playerIdx, playerNum, firstTeamIdx, tileSize, mapSize, markerPositions, diceValues, tilesOwner, positionsMark, lineOwner, nowTurn, scores } = this.state;
 		const {
 			gameFocus,
 			throwDices,
@@ -523,6 +600,8 @@ class Game extends React.Component {
 
 		if(!isMount)
 			return null;
+
+		const disableButton = playerNum === 1 && playerIdx !== nowTurn;
 
 		return (
 			<div className="container__game" onClick={gameFocus}>
@@ -569,24 +648,24 @@ class Game extends React.Component {
 					{/* 키보드 사용 설명서 */}
 					<div className="container__button">
 						<div className="container__spacebar">
-							<button className="button__spacebar" onClick={throwDices}>
+							<button className="button__spacebar" onClick={throwDices} disabled={disableButton}>
 								SPACE BAR
 							</button>
 							<p>주사위 굴리기</p>
 						</div>
 						<div className="container__arrow">
 							<div className="container__arrowKey">
-								<button className="button__arrow" onClick={()=>handleKeyDown(38)}>
+								<button className="button__arrow" onClick={()=>handleKeyDown(38)} disabled={disableButton}>
 									^
 								</button>
 								<div>
-									<button className="button__arrow" onClick={()=>handleKeyDown(37)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(37)} disabled={disableButton}>
 										{"<"}
 									</button>
-									<button className="button__arrow" onClick={()=>handleKeyDown(40)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(40)} disabled={disableButton}>
 										v
 									</button>
-									<button className="button__arrow" onClick={()=>handleKeyDown(39)}>
+									<button className="button__arrow" onClick={()=>handleKeyDown(39)} disabled={disableButton}>
 										{">"}
 									</button>
 								</div>
